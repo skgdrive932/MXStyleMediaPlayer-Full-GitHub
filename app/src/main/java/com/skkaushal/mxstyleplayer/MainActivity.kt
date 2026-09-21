@@ -1,29 +1,79 @@
 package com.skkaushal.mxstyleplayer
+
 import android.Manifest
-import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.skkaushal.mxstyleplayer.databinding.ActivityMainBinding
 import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
-class MainActivity:AppCompatActivity(){
-    private lateinit var b:ActivityMainBinding
-    private val permission=registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){}
-    override fun onCreate(s:Bundle?){
-        super.onCreate(s); b=ActivityMainBinding.inflate(layoutInflater); setContentView(b.root)
-        val p=mutableListOf<String>()
-        if(Build.VERSION.SDK_INT>=33){p+=Manifest.permission.READ_MEDIA_VIDEO;p+=Manifest.permission.READ_MEDIA_AUDIO;p+=Manifest.permission.POST_NOTIFICATIONS}
-        if(p.isNotEmpty()) permission.launch(p.toTypedArray())
-        load()
-        b.about.setOnClickListener{ android.widget.Toast.makeText(this,"Sk.Kaushal\nskgdrive932@gmail.com\n+919779371866",android.widget.Toast.LENGTH_LONG).show() }
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+    private val PERMISSION_REQ_CODE = 1001
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+
+        if (checkAndRequestPermissions()) {
+            loadVideos()
+        }
     }
-    private fun load(){
-        val list=MediaStoreRepository.videos(this)
-        b.list.layoutManager=LinearLayoutManager(this)
-        b.list.adapter=VideoAdapter(list){ startActivity(Intent(this,PlayerActivity::class.java).putExtra("uri",it.uri).putExtra("name",it.name)) }
-        b.count.text="${list.size} videos"
+
+    private fun checkAndRequestPermissions(): Boolean {
+        val permissionsNeeded = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.READ_MEDIA_VIDEO)
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+
+        return if (permissionsNeeded.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsNeeded.toTypedArray(), PERMISSION_REQ_CODE)
+            false
+        } else {
+            true
+        }
+    }
+
+    private fun loadVideos() {
+        val repository = MediaStoreRepository(this)
+        val videoList = repository.getAllVideos()
+
+        binding.txtVideoCount.text = "${videoList.size} Videos found"
+
+        if (videoList.isEmpty()) {
+            Toast.makeText(this, "Koi video nahi mili!", Toast.LENGTH_SHORT).show()
+        } else {
+            val adapter = VideoAdapter(this, videoList)
+            binding.recyclerView.adapter = adapter
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQ_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            loadVideos()
+        } else {
+            Toast.makeText(this, "Videos dikhane ke liye permission zaroori hai", Toast.LENGTH_SHORT).show()
+        }
     }
 }
