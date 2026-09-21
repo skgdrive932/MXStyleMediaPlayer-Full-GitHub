@@ -23,7 +23,7 @@ class VideoAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val video = videoList[position]
         
-        holder.binding.txtTitle.text = video.title
+        holder.binding.txtTitle.text = video.name
         
         val sizeMB = video.size / (1024 * 1024)
         val durationMin = (video.duration / 1000) / 60
@@ -32,7 +32,7 @@ class VideoAdapter(
 
         holder.itemView.setOnClickListener {
             val intent = Intent(context, PlayerActivity::class.java).apply {
-                putExtra("VIDEO_URI", video.contentUri)
+                putExtra("VIDEO_URI", video.uri)
             }
             context.startActivity(intent)
         }
