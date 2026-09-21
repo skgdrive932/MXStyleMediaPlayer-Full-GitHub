@@ -35,9 +35,9 @@ class MediaStoreRepository(private val context: Context) {
                 val name = cursor.getString(nameColumn) ?: "Unknown Video"
                 val duration = cursor.getLong(durationColumn)
                 val size = cursor.getLong(sizeColumn)
-                val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString()
 
-                videoList.add(VideoItem(id, name, duration, size, contentUri.toString()))
+                videoList.add(VideoItem(name, contentUri, duration, size))
             }
         }
         return videoList
