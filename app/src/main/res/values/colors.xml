@@ -1,1 +1,11 @@
-<resources><color name="black">#000000</color><color name="white">#FFFFFF</color></resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- MX Player Inspired Dark Palette -->
+    <color name="bg_dark">#121212</color>
+    <color name="card_bg">#1E1E2C</color>
+    <color name="primary_accent">#00E5FF</color> <!-- Cyan Accent -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#A0A0B2</color>
+    <color name="top_bar_bg">#181824</color>
+    <color name="btn_accent">#1E88E5</color>
+</resources>
