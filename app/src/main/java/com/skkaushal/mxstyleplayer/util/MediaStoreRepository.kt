@@ -1,24 +1,79 @@
-package com.skkaushal.mxstyleplayer.util
-import android.content.Context
-import android.provider.MediaStore
-import com.skkaushal.mxstyleplayer.model.VideoItem
+package com.skkaushal.mxstyleplayer
 
-object MediaStoreRepository {
-    fun videos(context:Context):List<VideoItem>{
-        val out=mutableListOf<VideoItem>()
-        val p=arrayOf(MediaStore.Video.Media.DISPLAY_NAME,MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.DURATION,MediaStore.Video.Media.SIZE)
-        context.contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,p,null,null,
-            MediaStore.Video.Media.DATE_ADDED+" DESC")?.use { c ->
-            val n=c.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
-            val id=c.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-            val d=c.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-            val s=c.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-            while(c.moveToNext()){
-                val uri=android.content.ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,c.getLong(id))
-                out+=VideoItem(c.getString(n),uri.toString(),c.getLong(d),c.getLong(s))
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.skkaushal.mxstyleplayer.databinding.ActivityMainBinding
+import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+    private val PERMISSION_REQ_CODE = 1001
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+
+        if (checkAndRequestPermissions()) {
+            loadVideos()
+        }
+    }
+
+    private fun checkAndRequestPermissions(): Boolean {
+        val permissionsNeeded = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.READ_MEDIA_VIDEO)
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
-        return out
+
+        return if (permissionsNeeded.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsNeeded.toTypedArray(), PERMISSION_REQ_CODE)
+            false
+        } else {
+            true
+        }
+    }
+
+    private fun loadVideos() {
+        val repository = MediaStoreRepository(this)
+        val videoList = repository.getAllVideos()
+
+        binding.txtVideoCount.text = "${videoList.size} Videos found"
+
+        if (videoList.isEmpty()) {
+            Toast.makeText(this, "Koi video nahi mili!", Toast.LENGTH_SHORT).show()
+        } else {
+            val adapter = VideoAdapter(this, videoList)
+            binding.recyclerView.adapter = adapter
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQ_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            loadVideos()
+        } else {
+            Toast.makeText(this, "Videos dikhane ke liye permission zaroori hai", Toast.LENGTH_SHORT).show()
+        }
     }
 }
