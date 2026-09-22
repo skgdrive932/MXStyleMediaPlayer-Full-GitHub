@@ -5,22 +5,22 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.skkaushal.mxstyleplayer.databinding.ActivityMainBinding
+import androidx.recyclerview.widget.RecyclerView
 import com.skkaushal.mxstyleplayer.model.FolderItem
-import com.skkaushal.mxstyleplayer.model.VideoItem
 import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
     private val folderList = ArrayList<FolderItem>()
     private lateinit var adapter: FolderAdapter
     private lateinit var repository: MediaStoreRepository
+    private lateinit var txtVideoCount: TextView
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -34,26 +34,25 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_main)
+
+        txtVideoCount = findViewById(R.id.txtVideoCount)
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
 
         repository = MediaStoreRepository(this)
-        setupRecyclerView()
-        checkAndRequestPermission()
-    }
 
-    private fun setupRecyclerView() {
         adapter = FolderAdapter(folderList) { folderItem ->
-            if (folderItem.videoList.isNotEmpty()) {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(folderItem.videoList[0].uri, "video/*")
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                startActivity(intent)
-            }
+            // Folder click hone par FolderVideosActivity open hogi aur video list pass hogi
+            FolderVideosActivity.currentVideoList = folderItem.videoList
+            FolderVideosActivity.folderName = folderItem.folderName
+            val intent = Intent(this, FolderVideosActivity::class.java)
+            startActivity(intent)
         }
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.adapter = adapter
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        checkAndRequestPermission()
     }
 
     private fun checkAndRequestPermission() {
@@ -76,6 +75,6 @@ class MainActivity : AppCompatActivity() {
         folderList.addAll(fetchedFolders)
         adapter.notifyDataSetChanged()
 
-        binding.txtVideoCount.text = "${folderList.size} folders"
+        txtVideoCount.text = "${folderList.size} folders"
     }
 }
