@@ -3,7 +3,7 @@ package com.skkaushal.mxstyleplayer
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
-import android.widget.ImageButton
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
@@ -39,14 +39,13 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setupRotateButton() {
-        val btnRotate = binding.playerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-        btnRotate?.setOnClickListener {
-            requestedOrientation = if (isLandscape) {
-                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        // PlayerView par click karke screen rotation toggle karne ka clean tarika
+        binding.playerView.setFullscreenButtonClickListener { isFullscreen ->
+            requestedOrientation = if (isFullscreen) {
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             } else {
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
-            isLandscape = !isLandscape
         }
     }
 
