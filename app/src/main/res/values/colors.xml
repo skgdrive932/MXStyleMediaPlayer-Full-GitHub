@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="mx_blue">#0088FF</color>
-    <color name="mx_dark_blue">#0066CC</color>
-    <color name="mx_bg_dark">#121212</color>
-    <color name="mx_card_bg">#1E1E1E</color>
-    <color name="mx_text_primary">#FFFFFF</color>
-    <color name="mx_text_secondary">#AAAAAA</color>
-    <color name="mx_play_icon">#0088FF</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- MX Player Navy Dark Theme Colors -->
+    <color name="mx_bg_dark">#0F1722</color>
+    <color name="mx_card_bg">#1A2332</color>
+    <color name="mx_text_primary">#E1E7EF</color>
+    <color name="mx_text_secondary">#8C9BAE</color>
+    <color name="mx_blue_accent">#258CF4</color>
+    <color name="mx_chip_bg">#1E293B</color>
 </resources>
