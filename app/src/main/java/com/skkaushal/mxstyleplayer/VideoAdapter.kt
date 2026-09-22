@@ -5,10 +5,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.skkaushal.mxstyleplayer.databinding.ItemVideoBinding
+import com.skkaushal.mxstyleplayer.model.VideoItem
 
 class VideoAdapter(
-    private val videoList: List<VideoModel>,
-    private val onVideoClick: (VideoModel) -> Unit
+    private val videoList: List<VideoItem>,
+    private val onVideoClick: (VideoItem) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     inner class VideoViewHolder(val binding: ItemVideoBinding) :
@@ -27,7 +28,6 @@ class VideoAdapter(
         holder.binding.txtTitle.text = video.title
         holder.binding.txtDurationBadge.text = video.duration
 
-        // Glide Thumbnail Loading
         Glide.with(holder.itemView.context)
             .load(video.uri)
             .centerCrop()
