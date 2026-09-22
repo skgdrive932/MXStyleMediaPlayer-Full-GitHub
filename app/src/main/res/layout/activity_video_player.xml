@@ -5,19 +5,19 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Player View (ExoPlayer / Media3) -->
+    <!-- Player View -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Backward / Forward Overlay Text Indicator -->
+    <!-- Overlay Indicator for Gesture (Seek, Brightness, Volume) -->
     <TextView
         android:id="@+id/txtGestureIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:background="#80000000"
+        android:background="#A0000000"
         android:paddingHorizontal="24dp"
         android:paddingVertical="12dp"
         android:textColor="#FFFFFF"
