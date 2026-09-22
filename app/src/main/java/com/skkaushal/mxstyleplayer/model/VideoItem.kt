@@ -1,9 +1,10 @@
 package com.skkaushal.mxstyleplayer.model
 
+import android.net.Uri
+
 data class VideoItem(
-    val name: String,
-    val uri: String,
-    val duration: Long,
-    val size: Long,
-    val folderName: String = "Internal Storage"
+    val id: Long,
+    val title: String,
+    val duration: String,
+    val uri: Uri
 )
