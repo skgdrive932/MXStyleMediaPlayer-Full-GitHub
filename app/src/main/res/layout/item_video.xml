@@ -1,74 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="4dp"
-    app:cardBackgroundColor="@color/mx_card_bg"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:background="@color/mx_bg_dark"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="8dp">
 
+    <!-- Video Thumbnail -->
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:id="@+id/thumbnailContainer"
+        android:layout_width="120dp"
+        android:layout_height="70dp"
+        android:layout_alignParentStart="true">
 
-        <!-- Video Thumbnail -->
-        <ImageView
-            android:id="@+id/imgThumbnail"
-            android:layout_width="110dp"
-            android:layout_height="70dp"
-            android:scaleType="centerCrop"
-            android:background="#2C2C2C"
-            android:contentDescription="Video Thumbnail" />
-
-        <!-- Play Overlay Icon on Thumbnail -->
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerInParent="true"
-            android:layout_alignInParent="@id/imgThumbnail"
-            android:src="@android:drawable/ic_media_play"
-            app:tint="#FFFFFF" />
-
-        <!-- Title -->
-        <TextView
-            android:id="@+id/txtTitle"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/imgThumbnail"
-            android:layout_toStartOf="@+id/btnMore"
-            android:layout_marginStart="12dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="@color/mx_text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:layout_height="match_parent"
+            app:cardCornerRadius="6dp"
+            app:cardElevation="0dp">
 
-        <!-- Duration & Size -->
+            <ImageView
+                android:id="@+id/imgThumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#2C3A4E"
+                android:scaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Time Badge on Thumbnail -->
         <TextView
-            android:id="@+id/txtInfo"
+            android:id="@+id/txtDurationBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/txtTitle"
-            android:layout_toEndOf="@id/imgThumbnail"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:textColor="@color/mx_text_secondary"
-            android:textSize="12sp" />
-
-        <!-- 3-Dot Menu Icon (MX Style) -->
-        <ImageView
-            android:id="@+id/btnMore"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:padding="4dp"
-            android:src="@android:drawable/ic_menu_more"
-            app:tint="@color/mx_text_secondary" />
-
+            android:layout_margin="4dp"
+            android:background="#B3000000"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="2dp"
+            android:text="00:00"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            android:textStyle="bold" />
     </RelativeLayout>
-</androidx.cardview.widget.CardView>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/thumbnailContainer"
+        android:layout_toStartOf="@+id/btnMore"
+        android:layout_marginStart="12dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/mx_text_primary"
+        android:textSize="14sp" />
+
+    <!-- 3-Dot Options Menu -->
+    <ImageView
+        android:id="@+id/btnMore"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:padding="4dp"
+        android:src="@android:drawable/ic_menu_more"
+        app:tint="@color/mx_text_secondary" />
+
+</RelativeLayout>
