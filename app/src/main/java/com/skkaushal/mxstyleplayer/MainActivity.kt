@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,23 +13,37 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.skkaushal.mxstyleplayer.model.AudioItem
 import com.skkaushal.mxstyleplayer.model.FolderItem
+import com.skkaushal.mxstyleplayer.util.AudioRepository
 import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
 class MainActivity : AppCompatActivity() {
 
     private val folderList = ArrayList<FolderItem>()
-    private lateinit var adapter: FolderAdapter
-    private lateinit var repository: MediaStoreRepository
-    private lateinit var txtVideoCount: TextView
+    private val audioList = ArrayList<AudioItem>()
+
+    private lateinit var folderAdapter: FolderAdapter
+    private lateinit var audioAdapter: AudioAdapter
+    private lateinit var videoRepository: MediaStoreRepository
+    private lateinit var audioRepository: AudioRepository
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var txtHeader: TextView
+
+    private var isVideoTab = true
 
     private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            loadFolders()
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val videoGranted = permissions[Manifest.permission.READ_MEDIA_VIDEO] ?: false
+        val audioGranted = permissions[Manifest.permission.READ_MEDIA_AUDIO] ?: false
+        val storageGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
+
+        if (videoGranted || audioGranted || storageGranted) {
+            loadData()
         } else {
-            Toast.makeText(this, "Permission denied to read videos", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Permissions required to load media", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -36,45 +51,73 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        txtVideoCount = findViewById(R.id.txtVideoCount)
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        txtHeader = findViewById(R.id.txtHeader)
+        recyclerView = findViewById(R.id.recyclerViewMain)
+        val btnNavVideos = findViewById<Button>(R.id.btnNavVideos)
+        val btnNavMusic = findViewById<Button>(R.id.btnNavMusic)
 
-        repository = MediaStoreRepository(this)
+        videoRepository = MediaStoreRepository(this)
+        audioRepository = AudioRepository(this)
 
-        adapter = FolderAdapter(folderList) { folderItem ->
-            // Folder click hone par FolderVideosActivity open hogi aur video list pass hogi
+        folderAdapter = FolderAdapter(folderList) { folderItem ->
             FolderVideosActivity.currentVideoList = folderItem.videoList
             FolderVideosActivity.folderName = folderItem.folderName
-            val intent = Intent(this, FolderVideosActivity::class.java)
+            startActivity(Intent(this, FolderVideosActivity::class.java))
+        }
+
+        audioAdapter = AudioAdapter(audioList) { audioItem ->
+            val intent = Intent(this, MusicPlayerActivity::class.java).apply {
+                putExtra("AUDIO_TITLE", audioItem.title)
+                putExtra("AUDIO_ARTIST", audioItem.artist)
+                putExtra("AUDIO_URI", audioItem.uri.toString())
+            }
             startActivity(intent)
         }
 
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
+        recyclerView.adapter = folderAdapter
 
-        checkAndRequestPermission()
-    }
-
-    private fun checkAndRequestPermission() {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_VIDEO
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
+        btnNavVideos.setOnClickListener {
+            if (!isVideoTab) {
+                isVideoTab = true
+                txtHeader.text = "Video Folders"
+                recyclerView.adapter = folderAdapter
+            }
         }
 
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-            loadFolders()
-        } else {
-            permissionLauncher.launch(permission)
+        btnNavMusic.setOnClickListener {
+            if (isVideoTab) {
+                isVideoTab = false
+                txtHeader.text = "All Music Track"
+                recyclerView.adapter = audioAdapter
+            }
         }
+
+        checkAndRequestPermissions()
     }
 
-    private fun loadFolders() {
-        val fetchedFolders = repository.getAllFolders()
+    private fun checkAndRequestPermissions() {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_AUDIO
+            )
+        } else {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        permissionLauncher.launch(permissions)
+    }
+
+    private fun loadData() {
+        // Load Video Folders
         folderList.clear()
-        folderList.addAll(fetchedFolders)
-        adapter.notifyDataSetChanged()
+        folderList.addAll(videoRepository.getAllFolders())
+        folderAdapter.notifyDataSetChanged()
 
-        txtVideoCount.text = "${folderList.size} folders"
+        // Load Audios
+        audioList.clear()
+        audioList.addAll(audioRepository.getAllAudios())
+        audioAdapter.notifyDataSetChanged()
     }
 }
