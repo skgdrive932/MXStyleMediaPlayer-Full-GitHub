@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:background="#121212">
 
+    <!-- Top Header Title -->
     <TextView
         android:id="@+id/txtHeader"
         android:layout_width="match_parent"
@@ -12,8 +13,9 @@
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:text="Folders" />
+        android:text="Video Folders" />
 
+    <!-- Main List (Videos Folder ya Music List ke liye) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMain"
         android:layout_width="match_parent"
@@ -21,6 +23,7 @@
         android:layout_below="@id/txtHeader"
         android:layout_above="@id/bottomNav" />
 
+    <!-- Bottom Navigation Buttons (Videos and Music Switcher) -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -34,6 +37,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
+            android:textColor="#FFFFFF"
             android:text="Videos" />
 
         <Button
@@ -41,6 +46,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
+            android:textColor="#FFFFFF"
             android:text="Music" />
     </LinearLayout>
 
