@@ -1,90 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mx_bg_dark">
+    android:background="#121212">
 
-    <!-- Top Action Bar -->
-    <RelativeLayout
-        android:id="@+id/topBar"
+    <TextView
+        android:id="@+id/txtHeader"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingHorizontal="16dp">
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="Folders" />
 
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="@color/mx_text_primary" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/btnBack"
-            android:layout_marginStart="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txtHeaderTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Movies"
-                android:textColor="@color/mx_text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtVideoCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 videos"
-                android:textColor="@color/mx_text_secondary"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/btnSearch"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@id/btnViewToggle"
-            android:layout_marginEnd="16dp"
-            android:src="@android:drawable/ic_menu_search"
-            app:tint="@color/mx_text_primary" />
-
-        <ImageView
-            android:id="@+id/btnViewToggle"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:src="@android:drawable/ic_menu_sort_by_size"
-            app:tint="@color/mx_text_primary" />
-    </RelativeLayout>
-
-    <!-- Videos RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+        android:id="@+id/recyclerViewMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/topBar"
-        android:clipToPadding="false"
-        android:paddingBottom="80dp" />
+        android:layout_below="@id/txtHeader"
+        android:layout_above="@id/bottomNav" />
 
-    <!-- Bottom Floating Play Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabPlay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="20dp"
-        android:src="@android:drawable/ic_media_play"
-        app:backgroundTint="@color/mx_blue_accent"
-        app:tint="@color/white" />
+        android:orientation="horizontal"
+        android:background="#1E1E1E">
+
+        <Button
+            android:id="@+id/btnNavVideos"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Videos" />
+
+        <Button
+            android:id="@+id/btnNavMusic"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Music" />
+    </LinearLayout>
 
 </RelativeLayout>
