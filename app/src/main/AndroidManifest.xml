@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Permissions for Audio and Video -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -11,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MXStylePlayer">
 
-        <!-- Folder List Main Screen -->
+        <!-- Main Home Screen with Tabs -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -21,16 +23,19 @@
             </intent-filter>
         </activity>
 
-        <!-- Folder Videos List Screen -->
         <activity
             android:name=".FolderVideosActivity"
             android:exported="false" />
 
-        <!-- Video Player Screen with Swipe Gestures -->
         <activity
             android:name=".VideoPlayerActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="sensorLandscape"
+            android:exported="false" />
+
+        <!-- Music Player Screen -->
+        <activity
+            android:name=".MusicPlayerActivity"
             android:exported="false" />
 
     </application>
