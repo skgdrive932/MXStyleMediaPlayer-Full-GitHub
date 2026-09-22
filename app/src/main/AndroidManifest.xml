@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Storage Permissions for Android 12 & below and Android 13+ -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
@@ -12,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MXStylePlayer">
 
-        <!-- Main Home Screen (Folders List) -->
+        <!-- Folder List Main Screen -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -22,9 +21,16 @@
             </intent-filter>
         </activity>
 
-        <!-- Folder Inside Videos List Screen -->
+        <!-- Folder Videos List Screen -->
         <activity
             android:name=".FolderVideosActivity"
+            android:exported="false" />
+
+        <!-- Video Player Screen with Swipe Gestures -->
+        <activity
+            android:name=".VideoPlayerActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
     </application>
