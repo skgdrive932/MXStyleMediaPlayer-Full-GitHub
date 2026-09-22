@@ -22,8 +22,8 @@ class PlaybackService : MediaSessionService() {
         mediaSession?.run {
             player.release()
             release()
-            mediaSession = null
         }
+        mediaSession = null
         super.onDestroy()
     }
 }
