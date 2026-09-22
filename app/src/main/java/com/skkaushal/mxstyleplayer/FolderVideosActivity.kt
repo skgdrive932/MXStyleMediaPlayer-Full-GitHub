@@ -25,9 +25,8 @@ class FolderVideosActivity : AppCompatActivity() {
         txtFolderTitle.text = folderName
 
         val adapter = VideoAdapter(currentVideoList) { videoItem ->
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(videoItem.uri, "video/*")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val intent = Intent(this, VideoPlayerActivity::class.java).apply {
+                putExtra("VIDEO_URI", videoItem.uri.toString())
             }
             startActivity(intent)
         }
