@@ -1,47 +1,41 @@
 package com.skkaushal.mxstyleplayer
 
-import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.skkaushal.mxstyleplayer.databinding.ItemVideoBinding
-import com.skkaushal.mxstyleplayer.model.VideoItem
 
 class VideoAdapter(
-    private val context: Context,
-    private val videoList: List<VideoItem>
+    private val videoList: List<VideoModel>,
+    private val onVideoClick: (VideoModel) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
-    class VideoViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class VideoViewHolder(val binding: ItemVideoBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
-        val binding = ItemVideoBinding.inflate(LayoutInflater.from(context), parent, false)
+        val binding = ItemVideoBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
         return VideoViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val video = videoList[position]
 
-        holder.binding.txtTitle.text = video.name
+        holder.binding.txtTitle.text = video.title
+        holder.binding.txtInfo.text = "${video.duration} • ${video.size}"
 
-        val sizeMB = video.size / (1024 * 1024)
-        val durationMin = (video.duration / 1000) / 60
-        val durationSec = (video.duration / 1000) % 60
-        holder.binding.txtSizeDuration.text = String.format("%02d:%02d • %d MB", durationMin, durationSec, sizeMB)
-
-        // Glide to load Video Thumbnail
-        Glide.with(context)
-            .load(video.uri)
+        // Glide Thumbnail Loading
+        Glide.with(holder.itemView.context)
+            .load(video.uri) // File Uri
             .centerCrop()
+            .placeholder(android.R.color.darker_gray)
             .into(holder.binding.imgThumbnail)
 
         holder.itemView.setOnClickListener {
-            val intent = Intent(context, PlayerActivity::class.java).apply {
-                putExtra("VIDEO_URI", video.uri)
-            }
-            context.startActivity(intent)
+            onVideoClick(video)
         }
     }
 
