@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.skkaushal.mxstyleplayer.databinding.ItemVideoBinding
 import com.skkaushal.mxstyleplayer.model.VideoItem
 
@@ -22,13 +23,19 @@ class VideoAdapter(
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val video = videoList[position]
-        
+
         holder.binding.txtTitle.text = video.name
-        
+
         val sizeMB = video.size / (1024 * 1024)
         val durationMin = (video.duration / 1000) / 60
         val durationSec = (video.duration / 1000) % 60
         holder.binding.txtSizeDuration.text = String.format("%02d:%02d • %d MB", durationMin, durationSec, sizeMB)
+
+        // Glide to load Video Thumbnail
+        Glide.with(context)
+            .load(video.uri)
+            .centerCrop()
+            .into(holder.binding.imgThumbnail)
 
         holder.itemView.setOnClickListener {
             val intent = Intent(context, PlayerActivity::class.java).apply {
