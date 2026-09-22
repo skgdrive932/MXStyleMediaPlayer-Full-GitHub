@@ -1,7 +1,9 @@
 package com.skkaushal.mxstyleplayer
 
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
@@ -11,6 +13,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPlayerBinding
     private var player: ExoPlayer? = null
+    private var isLandscape = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +24,8 @@ class PlayerActivity : AppCompatActivity() {
         if (videoUriString != null) {
             initializePlayer(Uri.parse(videoUriString))
         }
+
+        setupRotateButton()
     }
 
     private fun initializePlayer(uri: Uri) {
@@ -30,6 +35,18 @@ class PlayerActivity : AppCompatActivity() {
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
             exoPlayer.playWhenReady = true
+        }
+    }
+
+    private fun setupRotateButton() {
+        val btnRotate = binding.playerView.findViewById<ImageButton>(R.id.exo_fullscreen)
+        btnRotate?.setOnClickListener {
+            requestedOrientation = if (isLandscape) {
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            } else {
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            }
+            isLandscape = !isLandscape
         }
     }
 
