@@ -46,10 +46,11 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
-    // Media3 ExoPlayer (Video Playback)
+    // Media3 ExoPlayer & MediaSession
     implementation("androidx.media3:media3-exoplayer:1.3.1")
     implementation("androidx.media3:media3-ui:1.3.1")
     implementation("androidx.media3:media3-common:1.3.1")
+    implementation("androidx.media3:media3-session:1.3.1")
 
     // Glide (Video Thumbnails)
     implementation("com.github.bumptech.glide:glide:4.16.0")
