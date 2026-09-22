@@ -3,18 +3,20 @@ package com.skkaushal.mxstyleplayer.util
 import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
+import com.skkaushal.mxstyleplayer.model.FolderItem
 import com.skkaushal.mxstyleplayer.model.VideoItem
 import java.util.concurrent.TimeUnit
 
 class MediaStoreRepository(private val context: Context) {
 
-    fun getAllVideos(): List<VideoItem> {
-        val videoList = mutableListOf<VideoItem>()
+    fun getAllFolders(): List<FolderItem> {
+        val folderMap = HashMap<String, ArrayList<VideoItem>>()
 
         val projection = arrayOf(
             MediaStore.Video.Media._ID,
             MediaStore.Video.Media.TITLE,
-            MediaStore.Video.Media.DURATION
+            MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.BUCKET_DISPLAY_NAME
         )
 
         val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
@@ -29,32 +31,39 @@ class MediaStoreRepository(private val context: Context) {
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
             val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+            val bucketColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
                 val title = cursor.getString(titleColumn) ?: "Unknown"
                 val durationMs = cursor.getLong(durationColumn)
+                val folderName = cursor.getString(bucketColumn) ?: "Internal Storage"
 
                 val contentUri = ContentUris.withAppendedId(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                     id
                 )
 
-                val formattedDuration = formatDuration(durationMs)
-
-                // Correct parameters order matching VideoItem(id, title, duration, uri)
-                videoList.add(
-                    VideoItem(
-                        id = id,
-                        title = title,
-                        duration = formattedDuration,
-                        uri = contentUri
-                    )
+                val video = VideoItem(
+                    id = id,
+                    title = title,
+                    duration = formatDuration(durationMs),
+                    uri = contentUri
                 )
+
+                if (!folderMap.containsKey(folderName)) {
+                    folderMap[folderName] = ArrayList()
+                }
+                folderMap[folderName]?.add(video)
             }
         }
 
-        return videoList
+        val folderList = mutableListOf<FolderItem>()
+        for ((name, list) in folderMap) {
+            folderList.add(FolderItem(folderName = name, videoList = list))
+        }
+
+        return folderList
     }
 
     private fun formatDuration(durationMs: Long): String {
