@@ -25,11 +25,11 @@ class VideoAdapter(
         val video = videoList[position]
 
         holder.binding.txtTitle.text = video.title
-        holder.binding.txtInfo.text = "${video.duration} • ${video.size}"
+        holder.binding.txtDurationBadge.text = video.duration
 
         // Glide Thumbnail Loading
         Glide.with(holder.itemView.context)
-            .load(video.uri) // File Uri
+            .load(video.uri)
             .centerCrop()
             .placeholder(android.R.color.darker_gray)
             .into(holder.binding.imgThumbnail)
