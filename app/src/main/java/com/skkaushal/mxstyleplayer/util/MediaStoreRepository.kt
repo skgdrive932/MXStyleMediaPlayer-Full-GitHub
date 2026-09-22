@@ -4,45 +4,68 @@ import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
 import com.skkaushal.mxstyleplayer.model.VideoItem
+import java.util.concurrent.TimeUnit
 
 class MediaStoreRepository(private val context: Context) {
 
     fun getAllVideos(): List<VideoItem> {
         val videoList = mutableListOf<VideoItem>()
+
         val projection = arrayOf(
             MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.DISPLAY_NAME,
-            MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.SIZE,
-            MediaStore.Video.Media.BUCKET_DISPLAY_NAME
+            MediaStore.Video.Media.TITLE,
+            MediaStore.Video.Media.DURATION
         )
 
-        val query = context.contentResolver.query(
+        val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
+
+        context.contentResolver.query(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
             projection,
             null,
             null,
-            "${MediaStore.Video.Media.DATE_ADDED} DESC"
-        )
-
-        query?.use { cursor ->
+            sortOrder
+        )?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+            val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-            val bucketColumn = cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
-                val name = cursor.getString(nameColumn) ?: "Unknown Video"
-                val duration = cursor.getLong(durationColumn)
-                val size = cursor.getLong(sizeColumn)
-                val folderName = if (bucketColumn != -1) cursor.getString(bucketColumn) ?: "Internal Storage" else "Internal Storage"
-                val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString()
+                val title = cursor.getString(titleColumn) ?: "Unknown"
+                val durationMs = cursor.getLong(durationColumn)
 
-                videoList.add(VideoItem(name, contentUri, duration, size, folderName))
+                val contentUri = ContentUris.withAppendedId(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    id
+                )
+
+                val formattedDuration = formatDuration(durationMs)
+
+                // Correct parameters order matching VideoItem(id, title, duration, uri)
+                videoList.add(
+                    VideoItem(
+                        id = id,
+                        title = title,
+                        duration = formattedDuration,
+                        uri = contentUri
+                    )
+                )
             }
         }
+
         return videoList
+    }
+
+    private fun formatDuration(durationMs: Long): String {
+        val hours = TimeUnit.MILLISECONDS.toHours(durationMs)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMs) % 60
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+
+        return if (hours > 0) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
     }
 }
