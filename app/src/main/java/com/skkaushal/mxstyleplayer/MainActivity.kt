@@ -1,57 +1,81 @@
-import android.content.Context
-import android.provider.MediaStore
+package com.skkaushal.mxstyleplayer
 
-fun getAllFoldersWithVideos(context: Context): ArrayList<FolderModel> {
-    val folderList = ArrayList<FolderModel>()
-    val folderMap = HashMap<String, ArrayList<VideoModel>>()
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.skkaushal.mxstyleplayer.databinding.ActivityMainBinding
+import com.skkaushal.mxstyleplayer.model.FolderItem
+import com.skkaushal.mxstyleplayer.model.VideoItem
+import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
-    val projection = arrayOf(
-        MediaStore.Video.Media._ID,
-        MediaStore.Video.Media.TITLE,
-        MediaStore.Video.Media.DATA,
-        MediaStore.Video.Media.DURATION,
-        MediaStore.Video.Media.SIZE,
-        MediaStore.Video.Media.BUCKET_DISPLAY_NAME // Folder Name
-    )
+class MainActivity : AppCompatActivity() {
 
-    val cursor = context.contentResolver.query(
-        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-        projection,
-        null,
-        null,
-        "${MediaStore.Video.Media.DATE_ADDED} DESC"
-    )
+    private lateinit var binding: ActivityMainBinding
+    private val folderList = ArrayList<FolderItem>()
+    private lateinit var adapter: FolderAdapter
+    private lateinit var repository: MediaStoreRepository
 
-    cursor?.use {
-        val idColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-        val titleColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)
-        val pathColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
-        val durationColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-        val sizeColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-        val folderColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
-
-        while (it.moveToNext()) {
-            val id = it.getLong(idColumn)
-            val title = it.getString(titleColumn) ?: "Unknown"
-            val path = it.getString(pathColumn)
-            val duration = it.getLong(durationColumn)
-            val size = it.getLong(sizeColumn)
-            val folderName = it.getString(folderColumn) ?: "Internal Storage"
-
-            val video = VideoModel(id, title, path, duration, size, folderName)
-
-            // Map me check karke folder ke according list me add karein
-            if (!folderMap.containsKey(folderName)) {
-                folderMap[folderName] = ArrayList()
-            }
-            folderMap[folderName]?.add(video)
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            loadFolders()
+        } else {
+            Toast.makeText(this, "Permission denied to read videos", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // HashMap ko List me convert karein
-    for ((name, list) in folderMap) {
-        folderList.add(FolderModel(name, list))
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        repository = MediaStoreRepository(this)
+        setupRecyclerView()
+        checkAndRequestPermission()
     }
 
-    return folderList
+    private fun setupRecyclerView() {
+        adapter = FolderAdapter(folderList) { folderItem ->
+            if (folderItem.videoList.isNotEmpty()) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(folderItem.videoList[0].uri, "video/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(intent)
+            }
+        }
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = adapter
+    }
+
+    private fun checkAndRequestPermission() {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_VIDEO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
+            loadFolders()
+        } else {
+            permissionLauncher.launch(permission)
+        }
+    }
+
+    private fun loadFolders() {
+        val fetchedFolders = repository.getAllFolders()
+        folderList.clear()
+        folderList.addAll(fetchedFolders)
+        adapter.notifyDataSetChanged()
+
+        binding.txtVideoCount.text = "${folderList.size} folders"
+    }
 }
