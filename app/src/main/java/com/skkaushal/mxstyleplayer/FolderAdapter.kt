@@ -1,9 +1,10 @@
 package com.skkaushal.mxstyleplayer
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.skkaushal.mxstyleplayer.databinding.ItemFolderBinding
 import com.skkaushal.mxstyleplayer.model.FolderItem
 
 class FolderAdapter(
@@ -11,21 +12,23 @@ class FolderAdapter(
     private val onFolderClick: (FolderItem) -> Unit
 ) : RecyclerView.Adapter<FolderAdapter.FolderViewHolder>() {
 
-    inner class FolderViewHolder(val binding: ItemFolderBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    inner class FolderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val txtFolderName: TextView = itemView.findViewById(R.id.txtFolderName)
+        val txtVideoCount: TextView = itemView.findViewById(R.id.txtVideoCount)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderViewHolder {
-        val binding = ItemFolderBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
+        val view = LayoutInflater.from(parent.context).inflate(
+            R.layout.item_folder, parent, false
         )
-        return FolderViewHolder(binding)
+        return FolderViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: FolderViewHolder, position: Int) {
         val folder = folderList[position]
 
-        holder.binding.txtFolderName.text = folder.folderName
-        holder.binding.txtVideoCount.text = "${folder.videoList.size} videos"
+        holder.txtFolderName.text = folder.folderName
+        holder.txtVideoCount.text = "${folder.videoList.size} videos"
 
         holder.itemView.setOnClickListener {
             onFolderClick(folder)
