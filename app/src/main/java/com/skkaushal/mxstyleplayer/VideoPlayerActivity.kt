@@ -24,21 +24,24 @@ class VideoPlayerActivity : AppCompatActivity() {
 
         playerView = findViewById(R.id.playerView)
 
-        if (videoUri == null) {
+        val uriExtra = intent.getStringExtra("VIDEO_URI")
+        val uriToPlay = videoUri ?: if (!uriExtra.isNullOrEmpty()) Uri.parse(uriExtra) else null
+
+        if (uriToPlay == null) {
             Toast.makeText(this, "Cannot play video: Invalid URI", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        initializePlayer()
+        initializePlayer(uriToPlay)
     }
 
-    private fun initializePlayer() {
+    private fun initializePlayer(uri: Uri) {
         try {
             player = ExoPlayer.Builder(this).build()
             playerView.player = player
 
-            val mediaItem = MediaItem.fromUri(videoUri!!)
+            val mediaItem = MediaItem.fromUri(uri)
             player?.setMediaItem(mediaItem)
             player?.prepare()
             player?.playWhenReady = true
