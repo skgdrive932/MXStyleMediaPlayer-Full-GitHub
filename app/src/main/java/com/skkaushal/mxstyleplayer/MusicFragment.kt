@@ -41,19 +41,16 @@ class MusicFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        adapter = AudioAdapter(emptyList()) { item, position ->
-            if (currentTabPosition == 0) {
-                // Tracks Tab: Song Play activity open karein
-                val intent = Intent(requireContext(), MusicPlayerActivity::class.java).apply {
-                    putExtra("SONG_ID", item.id)
-                    putExtra("SONG_PATH", item.dataPath)
-                    putExtra("SONG_TITLE", item.title)
-                    putExtra("SONG_ARTIST", item.artist)
-                }
-                startActivity(intent)
-            } else {
-                // Albums, Artists, Folders par click event handling (Folder detail/Song list view)
+        adapter = AudioAdapter(emptyList()) { item, _ ->
+            // Har Tab se song play karne ka intent
+            val intent = Intent(requireContext(), MusicPlayerActivity::class.java).apply {
+                putExtra("SONG_ID", item.id)
+                putExtra("SONG_PATH", item.dataPath)
+                putExtra("SONG_TITLE", item.title)
+                putExtra("SONG_ARTIST", item.artist)
+                putExtra("SONG_URI", item.uri.toString())
             }
+            startActivity(intent)
         }
         recyclerView.adapter = adapter
     }
@@ -65,7 +62,6 @@ class MusicFragment : Fragment() {
         tabLayout.addTab(tabLayout.newTab().setText("Artists"))
         tabLayout.addTab(tabLayout.newTab().setText("Folders"))
 
-        // Default Load Tracks
         loadTabData(0)
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
