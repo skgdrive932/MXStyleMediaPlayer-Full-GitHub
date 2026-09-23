@@ -1,130 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
+    android:gravity="center"
+    android:orientation="vertical"
     android:padding="24dp">
 
+    <!-- Circular Spinning Thumbnail Container -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        app:cardCornerRadius="130dp"
+        app:cardElevation="8dp">
+
+        <ImageView
+            android:id="@+id/imgMusicThumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/my_custom_thumbnail" />
+    </androidx.cardview.widget.CardView>
+
     <TextView
-        android:id="@+id/txtHeader"
+        android:id="@+id/txtSongTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="NOW PLAYING"
-        android:textColor="#888888"
-        android:textSize="12sp"
-        android:letterSpacing="0.1" />
+        android:layout_marginTop="32dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Song Title"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-    <ImageView
-        android:id="@+id/imgAlbumArt"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_below="@id/txtHeader"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        android:background="#1E1E1E"
-        android:padding="30dp"
-        android:src="@android:drawable/ic_media_play" />
-
-    <LinearLayout
-        android:id="@+id/songDetailsLayout"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/txtArtistName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/imgAlbumArt"
-        android:layout_marginTop="30dp"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_marginTop="8dp"
+        android:text="Artist Name"
+        android:textColor="#B3B3B3"
+        android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/txtSongTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Song Title"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txtSongArtist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Artist Name"
-            android:textColor="#AAAAAA"
-            android:textSize="14sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/seekBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/songDetailsLayout"
-        android:layout_marginTop="30dp"
-        android:orientation="vertical">
-
-        <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="12dp">
-
-            <TextView
-                android:id="@+id/txtCurrentTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0:00"
-                android:textColor="#AAAAAA"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/txtTotalTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:text="0:00"
-                android:textColor="#AAAAAA"
-                android:textSize="12sp" />
-        </RelativeLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/seekBarLayout"
-        android:layout_marginTop="30dp"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <ImageButton
-            android:id="@+id/btnPrevious"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_media_previous" />
-
-        <ImageButton
-            android:id="@+id/btnPlayPause"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_marginHorizontal="24dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_media_pause" />
-
-        <ImageButton
-            android:id="@+id/btnNext"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_media_next" />
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>
