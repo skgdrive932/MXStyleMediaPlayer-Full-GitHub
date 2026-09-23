@@ -1,7 +1,6 @@
 package com.skkaushal.mxstyleplayer
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -9,16 +8,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.skkaushal.mxstyleplayer.model.FolderItem
-import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var repository: MediaStoreRepository
-    private lateinit var recyclerView: RecyclerView
     private lateinit var bottomNavigationView: BottomNavigationView
     private val STORAGE_PERMISSION_CODE = 101
 
@@ -26,23 +20,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        repository = MediaStoreRepository(this)
-        recyclerView = findViewById(R.id.recyclerViewFolders)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
         bottomNavigationView = findViewById(R.id.bottomNavigation)
 
-        // Bottom Navigation logic
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_videos -> {
-                    loadFolders()
+                    replaceFragment(VideoFoldersFragment())
                     true
                 }
                 R.id.nav_music -> {
-                    // Directly open Music Player with controls & rotating thumbnail
-                    val intent = Intent(this, MusicPlayerActivity::class.java)
-                    startActivity(intent)
+                    replaceFragment(MusicFragment())
                     true
                 }
                 else -> false
@@ -50,6 +37,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         checkAndRequestPermissions()
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
     }
 
     private fun checkAndRequestPermissions() {
@@ -62,19 +55,9 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(permission), STORAGE_PERMISSION_CODE)
         } else {
-            loadFolders()
+            // Default screen: Video Folders
+            replaceFragment(VideoFoldersFragment())
         }
-    }
-
-    private fun loadFolders() {
-        val folderList = repository.getAllFolders()
-
-        val adapter = FolderAdapter(folderList) { folderItem: FolderItem ->
-            FolderVideosActivity.currentVideoList = folderItem.videoList
-            FolderVideosActivity.folderName = folderItem.folderName
-            startActivity(Intent(this, FolderVideosActivity::class.java))
-        }
-        recyclerView.adapter = adapter
     }
 
     override fun onRequestPermissionsResult(
@@ -85,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == STORAGE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                loadFolders()
+                replaceFragment(VideoFoldersFragment())
             } else {
                 Toast.makeText(this, "Storage Permission Required", Toast.LENGTH_SHORT).show()
             }
