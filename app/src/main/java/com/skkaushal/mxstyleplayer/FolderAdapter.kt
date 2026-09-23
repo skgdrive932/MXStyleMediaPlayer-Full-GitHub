@@ -9,12 +9,12 @@ import com.skkaushal.mxstyleplayer.model.FolderItem
 
 class FolderAdapter(
     private val folderList: List<FolderItem>,
-    private val onItemClick: (FolderItem) -> Unit
+    private val onFolderClick: (FolderItem) -> Unit
 ) : RecyclerView.Adapter<FolderAdapter.FolderViewHolder>() {
 
     class FolderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val txtFolderName: TextView = itemView.findViewById(R.id.txtFolderName)
-        val txtVideoCount: TextView = itemView.findViewById(R.id.txtVideoCount)
+        val tvFolderName: TextView = itemView.findViewById(R.id.tvFolderName)
+        val tvVideoCount: TextView = itemView.findViewById(R.id.tvVideoCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderViewHolder {
@@ -25,11 +25,11 @@ class FolderAdapter(
 
     override fun onBindViewHolder(holder: FolderViewHolder, position: Int) {
         val folder = folderList[position]
-        holder.txtFolderName.text = folder.folderName
-        holder.txtVideoCount.text = "${folder.videoList.size} Videos"
+        holder.tvFolderName.text = folder.folderName
+        holder.tvVideoCount.text = "${folder.videoList.size} Videos"
 
         holder.itemView.setOnClickListener {
-            onItemClick(folder)
+            onFolderClick(folder)
         }
     }
 
