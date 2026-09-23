@@ -17,7 +17,7 @@ import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 class MainActivity : AppCompatActivity() {
 
     private lateinit var repository: MediaStoreRepository
-    private lateinit var recyclerView: RecyclerView
+    private var recyclerView: RecyclerView? = null
     private val STORAGE_PERMISSION_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,8 +25,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         repository = MediaStoreRepository(this)
-        recyclerView = findViewById(R.id.recyclerViewFolderVideos)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // Null-Safe ID checking to prevent crashes
+        recyclerView = findViewById(R.id.recyclerViewFolders) 
+            ?: findViewById(R.id.recyclerView) 
+            ?: findViewById(R.id.recyclerViewFolderVideos)
+
+        recyclerView?.layoutManager = LinearLayoutManager(this)
 
         checkAndRequestPermissions()
     }
@@ -53,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             FolderVideosActivity.folderName = folderItem.folderName
             startActivity(Intent(this, FolderVideosActivity::class.java))
         }
-        recyclerView.adapter = adapter
+        recyclerView?.adapter = adapter
     }
 
     override fun onRequestPermissionsResult(
