@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/my_custom_thumbnail" />
+            android:src="@android:drawable/ic_media_play" />
     </androidx.cardview.widget.CardView>
 
     <TextView
