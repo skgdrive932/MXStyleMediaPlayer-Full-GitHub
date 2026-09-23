@@ -54,13 +54,10 @@ class MusicFragment : Fragment() {
 
     private fun loadAudioTracks() {
         val trackList = repository.getAllAudioTracks()
-        val adapter = AudioAdapter(trackList) { audioItem ->
-            val intent = Intent(requireContext(), MusicPlayerActivity::class.java).apply {
-                putExtra("SONG_TITLE", audioItem.title)
-                putExtra("ARTIST_NAME", audioItem.artist)
-                putExtra("AUDIO_URI", audioItem.uri.toString())
-            }
-            startActivity(intent)
+        val adapter = AudioAdapter(trackList) { position ->
+            MusicPlayerActivity.playlist = trackList
+            MusicPlayerActivity.currentPosition = position
+            startActivity(Intent(requireContext(), MusicPlayerActivity::class.java))
         }
         recyclerView.adapter = adapter
     }
