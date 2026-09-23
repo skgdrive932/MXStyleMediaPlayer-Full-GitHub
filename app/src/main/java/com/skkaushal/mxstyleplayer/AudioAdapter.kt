@@ -9,28 +9,27 @@ import com.skkaushal.mxstyleplayer.model.AudioItem
 
 class AudioAdapter(
     private val audioList: List<AudioItem>,
-    private val onAudioClick: (AudioItem) -> Unit
+    private val onItemClick: (AudioItem) -> Unit
 ) : RecyclerView.Adapter<AudioAdapter.AudioViewHolder>() {
 
-    inner class AudioViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val txtAudioTitle: TextView = itemView.findViewById(R.id.txtAudioTitle)
-        val txtAudioArtist: TextView = itemView.findViewById(R.id.txtAudioArtist)
+    class AudioViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val txtTitle: TextView = itemView.findViewById(R.id.txtFolderName)
+        val txtSubTitle: TextView = itemView.findViewById(R.id.txtVideoCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AudioViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.item_audio, parent, false
-        )
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_folder, parent, false)
         return AudioViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: AudioViewHolder, position: Int) {
         val audio = audioList[position]
-        holder.txtAudioTitle.text = audio.title
-        holder.txtAudioArtist.text = audio.artist
+        holder.txtTitle.text = audio.title
+        holder.txtSubTitle.text = "${audio.artist} • ${audio.album}"
 
         holder.itemView.setOnClickListener {
-            onAudioClick(audio)
+            onItemClick(audio)
         }
     }
 
