@@ -54,7 +54,7 @@ class MusicFragment : Fragment() {
 
     private fun loadAudioTracks() {
         val trackList = repository.getAllAudioTracks()
-        val adapter = AudioAdapter(trackList) { position ->
+        val adapter = AudioAdapter(trackList) { position: Int ->
             MusicPlayerActivity.playlist = trackList
             MusicPlayerActivity.currentPosition = position
             startActivity(Intent(requireContext(), MusicPlayerActivity::class.java))
