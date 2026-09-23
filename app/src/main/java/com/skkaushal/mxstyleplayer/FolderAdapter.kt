@@ -13,8 +13,8 @@ class FolderAdapter(
 ) : RecyclerView.Adapter<FolderAdapter.FolderViewHolder>() {
 
     class FolderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvFolderName: TextView = itemView.findViewById(R.id.tvFolderName)
-        val tvVideoCount: TextView = itemView.findViewById(R.id.tvVideoCount)
+        val txtFolderName: TextView = itemView.findViewById(R.id.txtFolderName)
+        val txtVideoCount: TextView = itemView.findViewById(R.id.txtVideoCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderViewHolder {
@@ -25,8 +25,8 @@ class FolderAdapter(
 
     override fun onBindViewHolder(holder: FolderViewHolder, position: Int) {
         val folder = folderList[position]
-        holder.tvFolderName.text = folder.folderName
-        holder.tvVideoCount.text = "${folder.videoList.size} Videos"
+        holder.txtFolderName.text = folder.folderName
+        holder.txtVideoCount.text = "${folder.videoList.size} Videos"
 
         holder.itemView.setOnClickListener {
             onFolderClick(folder)
