@@ -5,8 +5,14 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import com.skkaushal.mxstyleplayer.model.VideoItem
 
 class MusicPlayerActivity : AppCompatActivity() {
+
+    companion object {
+        var playlist: ArrayList<VideoItem> = ArrayList()
+        var currentPosition: Int = 0
+    }
 
     private lateinit var imgThumbnail: ImageView
     private lateinit var rotateAnimation: Animation
@@ -17,11 +23,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_music_player)
 
         imgThumbnail = findViewById(R.id.imgMusicThumbnail)
-
-        // Animation Load Karein
         rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate)
 
-        // Sample Play/Pause Click Control
         imgThumbnail.setOnClickListener {
             if (isPlaying) {
                 pauseMusic()
@@ -30,7 +33,6 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
         }
 
-        // Auto start on open
         playMusic()
     }
 
