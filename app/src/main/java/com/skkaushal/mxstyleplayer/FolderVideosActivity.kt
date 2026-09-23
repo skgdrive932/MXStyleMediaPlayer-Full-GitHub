@@ -1,5 +1,6 @@
 package com.skkaushal.mxstyleplayer
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +22,13 @@ class FolderVideosActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewFolderVideos)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val adapter = VideoAdapter(videoList)
+        val adapter = VideoAdapter(videoList) { videoItem ->
+            val intent = Intent(this, VideoPlayerActivity::class.java).apply {
+                putExtra("VIDEO_URI", videoItem.uri.toString())
+                putExtra("VIDEO_TITLE", videoItem.title)
+            }
+            startActivity(intent)
+        }
         recyclerView.adapter = adapter
     }
 }
