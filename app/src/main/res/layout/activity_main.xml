@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="#121212">
+
+    <!-- Categorization Tabs for Music/Video View -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1E1E1E"
+        app:tabIndicatorColor="#FF4081"
+        app:tabSelectedTextColor="#FFFFFF"
+        app:tabTextColor="#B0B0B0" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewFolders"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/tabLayout"
         android:layout_above="@id/bottomNavigation"
         android:scrollbars="vertical" />
 
