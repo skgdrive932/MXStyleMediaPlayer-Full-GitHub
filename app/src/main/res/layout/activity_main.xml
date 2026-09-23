@@ -1,36 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212">
 
-    <!-- Top Header Title -->
     <TextView
         android:id="@+id/txtHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
+        android:text="Video Folders"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:text="Video Folders" />
+        android:textStyle="bold" />
 
-    <!-- Main List (Videos Folder ya Music List ke liye) -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/categoryTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtHeader"
+        android:background="#121212"
+        android:visibility="gone"
+        app:tabIndicatorColor="#BB86FC"
+        app:tabMode="scrollable"
+        app:tabSelectedTextColor="#BB86FC"
+        app:tabTextColor="#888888" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/txtHeader"
-        android:layout_above="@id/bottomNav" />
+        android:layout_above="@id/bottomNav"
+        android:layout_below="@id/categoryTabs" />
 
-    <!-- Bottom Navigation Buttons (Videos and Music Switcher) -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:background="#1E1E1E">
+        android:background="#1E1E1E"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnNavVideos"
@@ -38,8 +48,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground"
-            android:textColor="#FFFFFF"
-            android:text="Videos" />
+            android:text="Videos"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/btnNavMusic"
@@ -47,8 +57,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground"
-            android:textColor="#FFFFFF"
-            android:text="Music" />
+            android:text="Music"
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
 </RelativeLayout>
