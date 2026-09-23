@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class VideoPlayerActivity : AppCompatActivity() {
 
-    private var videoView: VideoView? = null
+    private var playerView: VideoView? = null
     private lateinit var gestureDetector: GestureDetector
     private lateinit var audioManager: AudioManager
 
@@ -24,20 +24,24 @@ class VideoPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
 
-        videoView = findViewById(R.id.videoView) ?: findViewById(R.id.playerView)
+        val idVideoView = resources.getIdentifier("videoView", "id", packageName)
+        val idPlayerView = resources.getIdentifier("playerView", "id", packageName)
+
+        playerView = if (idVideoView != 0) findViewById(idVideoView) else findViewById(idPlayerView)
+        
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         screenWidth = resources.displayMetrics.widthPixels
 
         val videoUriStr = intent.getStringExtra("VIDEO_URI")
         if (!videoUriStr.isNullOrEmpty()) {
-            videoView?.setVideoURI(Uri.parse(videoUriStr))
-            videoView?.start()
+            playerView?.setVideoURI(Uri.parse(videoUriStr))
+            playerView?.start()
         }
 
         setupGestures()
 
-        videoView?.setOnTouchListener { _, event ->
+        playerView?.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             true
         }
@@ -60,10 +64,10 @@ class VideoPlayerActivity : AppCompatActivity() {
                 if (Math.abs(deltaX) > Math.abs(deltaY)) {
                     if (Math.abs(deltaX) > 50) {
                         val seekAmount = (deltaX / 10).toInt() * 1000
-                        val current = videoView?.currentPosition ?: 0
-                        val duration = videoView?.duration ?: 0
+                        val current = playerView?.currentPosition ?: 0
+                        val duration = playerView?.duration ?: 0
                         val newPos = (current + seekAmount).coerceIn(0, duration)
-                        videoView?.seekTo(newPos)
+                        playerView?.seekTo(newPos)
                     }
                 } else {
                     if (e1.x < screenWidth / 2) {
