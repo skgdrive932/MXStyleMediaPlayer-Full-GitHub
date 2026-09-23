@@ -17,7 +17,7 @@ import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 class MainActivity : AppCompatActivity() {
 
     private lateinit var repository: MediaStoreRepository
-    private var recyclerView: RecyclerView? = null
+    private lateinit var recyclerView: RecyclerView
     private val STORAGE_PERMISSION_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,10 +25,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         repository = MediaStoreRepository(this)
-
-        // Find RecyclerView safely matching activity_main.xml IDs
-        recyclerView = findViewById(R.id.recyclerViewFolders) ?: findViewById(R.id.recyclerView)
-        recyclerView?.layoutManager = LinearLayoutManager(this)
+        recyclerView = findViewById(R.id.recyclerViewFolderVideos)
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
         checkAndRequestPermissions()
     }
@@ -51,11 +49,11 @@ class MainActivity : AppCompatActivity() {
         val folderList = repository.getAllFolders()
 
         val adapter = FolderAdapter(folderList) { folderItem: FolderItem ->
-            FolderVideosActivity.currentVideoList = folderItem.videos
-            FolderVideosActivity.folderName = folderItem.name
+            FolderVideosActivity.currentVideoList = folderItem.videoList
+            FolderVideosActivity.folderName = folderItem.folderName
             startActivity(Intent(this, FolderVideosActivity::class.java))
         }
-        recyclerView?.adapter = adapter
+        recyclerView.adapter = adapter
     }
 
     override fun onRequestPermissionsResult(
@@ -68,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadFolders()
             } else {
-                Toast.makeText(this, "Storage Permission Required to Display Media", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Storage Permission Required", Toast.LENGTH_SHORT).show()
             }
         }
     }
