@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.skkaushal.mxstyleplayer.model.FolderItem
 import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
 class VideoFoldersFragment : Fragment() {
@@ -22,6 +21,7 @@ class VideoFoldersFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_video_folders, container, false)
+
         recyclerView = view.findViewById(R.id.recyclerViewFolders)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -33,10 +33,12 @@ class VideoFoldersFragment : Fragment() {
 
     private fun loadFolders() {
         val folderList = repository.getAllFolders()
-        val adapter = FolderAdapter(folderList) { folderItem: FolderItem ->
-            FolderVideosActivity.currentVideoList = folderItem.videoList
-            FolderVideosActivity.folderName = folderItem.folderName
-            startActivity(Intent(requireContext(), FolderVideosActivity::class.java))
+        val adapter = FolderAdapter(folderList) { folderItem ->
+            val intent = Intent(requireContext(), FolderVideosActivity::class.java).apply {
+                putExtra("FOLDER_NAME", folderItem.folderName)
+            }
+            FolderVideosActivity.videoList = folderItem.videoList
+            startActivity(intent)
         }
         recyclerView.adapter = adapter
     }
