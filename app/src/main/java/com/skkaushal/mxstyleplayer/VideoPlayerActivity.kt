@@ -7,13 +7,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
-import android.view.WindowManager
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 
 class VideoPlayerActivity : AppCompatActivity() {
 
-    private lateinit var videoView: VideoView
+    private var videoView: VideoView? = null
     private lateinit var gestureDetector: GestureDetector
     private lateinit var audioManager: AudioManager
 
@@ -25,20 +24,20 @@ class VideoPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
 
-        videoView = findViewById(R.id.videoView)
+        videoView = findViewById(R.id.videoView) ?: findViewById(R.id.playerView)
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         screenWidth = resources.displayMetrics.widthPixels
 
         val videoUriStr = intent.getStringExtra("VIDEO_URI")
         if (!videoUriStr.isNullOrEmpty()) {
-            videoView.setVideoURI(Uri.parse(videoUriStr))
-            videoView.start()
+            videoView?.setVideoURI(Uri.parse(videoUriStr))
+            videoView?.start()
         }
 
         setupGestures()
 
-        videoView.setOnTouchListener { _, event ->
+        videoView?.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             true
         }
@@ -59,14 +58,14 @@ class VideoPlayerActivity : AppCompatActivity() {
                 val deltaY = e1.y - e2.y
 
                 if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                    // Horizontal Scroll: Seek Video (Forward / Rewind)
                     if (Math.abs(deltaX) > 50) {
                         val seekAmount = (deltaX / 10).toInt() * 1000
-                        val newPos = (videoView.currentPosition + seekAmount).coerceIn(0, videoView.duration)
-                        videoView.seekTo(newPos)
+                        val current = videoView?.currentPosition ?: 0
+                        val duration = videoView?.duration ?: 0
+                        val newPos = (current + seekAmount).coerceIn(0, duration)
+                        videoView?.seekTo(newPos)
                     }
                 } else {
-                    // Vertical Scroll: Left side Brightness, Right side Volume
                     if (e1.x < screenWidth / 2) {
                         adjustBrightness(deltaY)
                     } else {
