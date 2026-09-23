@@ -1,5 +1,6 @@
 package com.skkaushal.mxstyleplayer
 
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -8,136 +9,107 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import com.skkaushal.mxstyleplayer.model.AudioItem
-import java.util.Locale
 
 class MusicPlayerActivity : AppCompatActivity() {
 
-    companion object {
-        var playlist: List<AudioItem> = ArrayList()
-        var currentPosition: Int = 0
-    }
-
-    private var player: ExoPlayer? = null
-    private lateinit var txtTitle: TextView
-    private lateinit var txtArtist: TextView
-    private lateinit var txtCurrentTime: TextView
-    private lateinit var txtTotalTime: TextView
-    private lateinit var seekBar: SeekBar
+    private var mediaPlayer: MediaPlayer? = null
+    private lateinit var tvTitle: TextView
+    private lateinit var tvArtist: TextView
     private lateinit var btnPlayPause: ImageView
-    private lateinit var btnNext: ImageView
-    private lateinit var btnPrevious: ImageView
+    private lateinit var seekBar: SeekBar
+    private lateinit var tvCurrentTime: TextView
+    private lateinit var tvTotalTime: TextView
 
     private val handler = Handler(Looper.getMainLooper())
-    private val updateProgressRunnable = object : Runnable {
-        override fun run() {
-            player?.let {
-                if (it.isPlaying) {
-                    seekBar.progress = it.currentPosition.toInt()
-                    txtCurrentTime.text = formatTime(it.currentPosition)
-                    handler.postDelayed(this, 1000)
-                }
-            }
-        }
-    }
+    private var isPlaying = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
 
-        txtTitle = findViewById(R.id.txtSongTitle)
-        txtArtist = findViewById(R.id.txtArtistName)
-        txtCurrentTime = findViewById(R.id.txtCurrentTime)
-        txtTotalTime = findViewById(R.id.txtTotalTime)
-        seekBar = findViewById(R.id.seekBar)
+        tvTitle = findViewById(R.id.tvSongTitle)
+        tvArtist = findViewById(R.id.tvArtistName)
         btnPlayPause = findViewById(R.id.btnPlayPause)
-        btnNext = findViewById(R.id.btnNext)
-        btnPrevious = findViewById(R.id.btnPrevious)
+        seekBar = findViewById(R.id.seekBar)
+        tvCurrentTime = findViewById(R.id.tvCurrentTime)
+        tvTotalTime = findViewById(R.id.tvTotalTime)
 
-        setupPlayer()
+        val title = intent.getStringExtra("SONG_TITLE") ?: "Song Title"
+        val artist = intent.getStringExtra("SONG_ARTIST") ?: "Artist Name"
+        val songUriStr = intent.getStringExtra("SONG_URI")
+
+        tvTitle.text = title
+        tvArtist.text = artist
+
+        if (!songUriStr.isNullOrEmpty()) {
+            initMediaPlayer(Uri.parse(songUriStr))
+        }
 
         btnPlayPause.setOnClickListener {
-            player?.let {
-                if (it.isPlaying) {
-                    it.pause()
-                    btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
-                } else {
-                    it.play()
-                    btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
-                    handler.post(updateProgressRunnable)
-                }
-            }
-        }
-
-        btnNext.setOnClickListener {
-            if (playlist.isNotEmpty() && currentPosition < playlist.size - 1) {
-                currentPosition++
-                playCurrentAudio()
-            }
-        }
-
-        btnPrevious.setOnClickListener {
-            if (playlist.isNotEmpty() && currentPosition > 0) {
-                currentPosition--
-                playCurrentAudio()
-            }
+            if (isPlaying) pauseSong() else playSong()
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    player?.seekTo(progress.toLong())
-                    txtCurrentTime.text = formatTime(progress.toLong())
-                }
+                if (fromUser) mediaPlayer?.seekTo(progress)
             }
             override fun onStartTrackingTouch(sb: SeekBar?) {}
             override fun onStopTrackingTouch(sb: SeekBar?) {}
         })
     }
 
-    private fun setupPlayer() {
-        player = ExoPlayer.Builder(this).build()
-        player?.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_READY) {
-                    val duration = player?.duration ?: 0L
-                    seekBar.max = duration.toInt()
-                    txtTotalTime.text = formatTime(duration)
-                    handler.post(updateProgressRunnable)
-                }
+    private fun initMediaPlayer(uri: Uri) {
+        try {
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(applicationContext, uri)
+                prepare()
+                start()
             }
-        })
-        playCurrentAudio()
+            isPlaying = true
+            btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+            seekBar.max = mediaPlayer?.duration ?: 0
+            tvTotalTime.text = formatTime(mediaPlayer?.duration ?: 0)
+            updateSeekBar()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    private fun playCurrentAudio() {
-        if (playlist.isEmpty() || currentPosition !in playlist.indices) return
-
-        val audio = playlist[currentPosition]
-        txtTitle.text = audio.title
-        txtArtist.text = audio.artist
-
-        player?.stop()
-        val mediaItem = MediaItem.fromUri(audio.uri)
-        player?.setMediaItem(mediaItem)
-        player?.prepare()
-        player?.play()
+    private fun playSong() {
+        mediaPlayer?.start()
+        isPlaying = true
         btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
     }
 
-    private fun formatTime(ms: Long): String {
-        val seconds = (ms / 1000) % 60
-        val minutes = (ms / (1000 * 60)) % 60
-        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+    private fun pauseSong() {
+        mediaPlayer?.pause()
+        isPlaying = false
+        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+    }
+
+    private fun updateSeekBar() {
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                mediaPlayer?.let {
+                    if (it.isPlaying) {
+                        seekBar.progress = it.currentPosition
+                        tvCurrentTime.text = formatTime(it.currentPosition)
+                    }
+                }
+                handler.postDelayed(this, 1000)
+            }
+        }, 0)
+    }
+
+    private fun formatTime(ms: Int): String {
+        val min = (ms / 1000) / 60
+        val sec = (ms / 1000) % 60
+        return String.format("%02d:%02d", min, sec)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacks(updateProgressRunnable)
-        player?.release()
-        player = null
+        mediaPlayer?.release()
+        handler.removeCallbacksAndMessages(null)
     }
 }
