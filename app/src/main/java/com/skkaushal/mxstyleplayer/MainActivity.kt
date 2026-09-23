@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import com.skkaushal.mxstyleplayer.model.AudioItem
+import com.skkaushal.mxstyleplayer.model.CategoryItem
+import com.skkaushal.mxstyleplayer.model.CategoryType
 import com.skkaushal.mxstyleplayer.model.FolderItem
 import com.skkaushal.mxstyleplayer.util.AudioRepository
 import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
@@ -22,9 +24,12 @@ class MainActivity : AppCompatActivity() {
     private val folderList = ArrayList<FolderItem>()
     private val allAudioList = ArrayList<AudioItem>()
     private val displayedAudioList = ArrayList<AudioItem>()
+    private val categoryList = ArrayList<CategoryItem>()
 
     private lateinit var folderAdapter: FolderAdapter
     private lateinit var audioAdapter: AudioAdapter
+    private lateinit var categoryAdapter: CategoryAdapter
+
     private lateinit var videoRepository: MediaStoreRepository
     private lateinit var audioRepository: AudioRepository
 
@@ -66,6 +71,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, MusicPlayerActivity::class.java))
         }
 
+        categoryAdapter = CategoryAdapter(categoryList) { categoryItem ->
+            // Category par click karne par us category ke songs open honge
+            openCategorySongs(categoryItem)
+        }
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = folderAdapter
 
@@ -80,7 +90,6 @@ class MainActivity : AppCompatActivity() {
             isVideoTab = false
             txtHeader.text = "Music Library"
             categoryTabs.visibility = View.VISIBLE
-            recyclerView.adapter = audioAdapter
             filterMusicByTab(categoryTabs.selectedTabPosition)
         }
 
@@ -103,13 +112,55 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun filterMusicByTab(position: Int) {
-        displayedAudioList.clear()
         when (position) {
-            0 -> displayedAudioList.addAll(allAudioList)
-            1 -> displayedAudioList.addAll(allAudioList.distinctBy { it.album })
-            2 -> displayedAudioList.addAll(allAudioList.distinctBy { it.artist })
-            3 -> displayedAudioList.addAll(allAudioList.distinctBy { it.folderName })
+            0 -> {
+                // Tracks Tab: Show all songs
+                displayedAudioList.clear()
+                displayedAudioList.addAll(allAudioList)
+                recyclerView.adapter = audioAdapter
+                audioAdapter.notifyDataSetChanged()
+            }
+            1 -> {
+                // Albums Tab: Group by Album
+                categoryList.clear()
+                val albumsMap = allAudioList.groupBy { it.album }
+                albumsMap.forEach { (albumName, songs) ->
+                    categoryList.add(CategoryItem(albumName, songs.size, CategoryType.ALBUM))
+                }
+                recyclerView.adapter = categoryAdapter
+                categoryAdapter.notifyDataSetChanged()
+            }
+            2 -> {
+                // Artists Tab: Group by Artist
+                categoryList.clear()
+                val artistsMap = allAudioList.groupBy { it.artist }
+                artistsMap.forEach { (artistName, songs) ->
+                    categoryList.add(CategoryItem(artistName, songs.size, CategoryType.ARTIST))
+                }
+                recyclerView.adapter = categoryAdapter
+                categoryAdapter.notifyDataSetChanged()
+            }
+            3 -> {
+                // Folders Tab: Group by Folder
+                categoryList.clear()
+                val foldersMap = allAudioList.groupBy { it.folderName }
+                foldersMap.forEach { (folderName, songs) ->
+                    categoryList.add(CategoryItem(folderName, songs.size, CategoryType.FOLDER))
+                }
+                recyclerView.adapter = categoryAdapter
+                categoryAdapter.notifyDataSetChanged()
+            }
         }
+    }
+
+    private fun openCategorySongs(categoryItem: CategoryItem) {
+        displayedAudioList.clear()
+        when (categoryItem.type) {
+            CategoryType.ALBUM -> displayedAudioList.addAll(allAudioList.filter { it.album == categoryItem.name })
+            CategoryType.ARTIST -> displayedAudioList.addAll(allAudioList.filter { it.artist == categoryItem.name })
+            CategoryType.FOLDER -> displayedAudioList.addAll(allAudioList.filter { it.folderName == categoryItem.name })
+        }
+        recyclerView.adapter = audioAdapter
         audioAdapter.notifyDataSetChanged()
     }
 
