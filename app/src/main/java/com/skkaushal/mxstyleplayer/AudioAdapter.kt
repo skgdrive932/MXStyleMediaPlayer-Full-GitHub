@@ -9,7 +9,7 @@ import com.skkaushal.mxstyleplayer.model.AudioItem
 
 class AudioAdapter(
     private val audioList: List<AudioItem>,
-    private val onItemClick: (AudioItem) -> Unit
+    private val onItemClick: (Int) -> Unit
 ) : RecyclerView.Adapter<AudioAdapter.AudioViewHolder>() {
 
     class AudioViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -29,7 +29,7 @@ class AudioAdapter(
         holder.txtSubTitle.text = "${audio.artist} • ${audio.album}"
 
         holder.itemView.setOnClickListener {
-            onItemClick(audio)
+            onItemClick(position)
         }
     }
 
