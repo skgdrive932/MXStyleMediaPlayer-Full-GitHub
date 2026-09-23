@@ -11,6 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.skkaushal.mxstyleplayer.model.FolderItem
 import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
@@ -18,6 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var repository: MediaStoreRepository
     private lateinit var recyclerView: RecyclerView
+    private lateinit var bottomNavigationView: BottomNavigationView
     private val STORAGE_PERMISSION_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,9 +27,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         repository = MediaStoreRepository(this)
-        
         recyclerView = findViewById(R.id.recyclerViewFolders)
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        bottomNavigationView = findViewById(R.id.bottomNavigation)
+        
+        // Navigation click listener
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_videos -> {
+                    loadFolders()
+                    true
+                }
+                R.id.nav_music -> {
+                    // Open Music Player activity
+                    val intent = Intent(this, MusicPlayerActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
+        }
 
         checkAndRequestPermissions()
     }
