@@ -14,7 +14,8 @@ class AudioRepository(private val context: Context) {
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.DURATION
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.DATA
         )
 
         val cursor = context.contentResolver.query(
@@ -31,6 +32,7 @@ class AudioRepository(private val context: Context) {
             val artistCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val albumCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
             val durationCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+            val dataCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
 
             while (it.moveToNext()) {
                 val id = it.getLong(idCol)
@@ -38,9 +40,9 @@ class AudioRepository(private val context: Context) {
                 val artist = it.getString(artistCol) ?: "<Unknown Artist>"
                 val album = it.getString(albumCol) ?: "Unknown Album"
                 val duration = it.getLong(durationCol)
+                val path = it.getString(dataCol) ?: ""
                 val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
 
-                // Corrected parameter sequence matching AudioItem data class
                 audioList.add(
                     AudioItem(
                         id = id,
@@ -48,7 +50,8 @@ class AudioRepository(private val context: Context) {
                         artist = artist,
                         album = album,
                         duration = duration,
-                        uri = uri
+                        uri = uri,
+                        dataPath = path
                     )
                 )
             }
