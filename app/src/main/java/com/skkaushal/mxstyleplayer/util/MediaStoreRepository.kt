@@ -5,17 +5,16 @@ import android.content.Context
 import android.provider.MediaStore
 import com.skkaushal.mxstyleplayer.model.FolderItem
 import com.skkaushal.mxstyleplayer.model.VideoItem
+import java.util.Locale
 
 class MediaStoreRepository(private val context: Context) {
 
     fun getAllFolders(): List<FolderItem> {
-        val folderMap = HashMap<String, MutableList<VideoItem>>()
+        val folderMap = HashMap<String, ArrayList<VideoItem>>()
         val projection = arrayOf(
             MediaStore.Video.Media._ID,
             MediaStore.Video.Media.DISPLAY_NAME,
-            MediaStore.Video.Media.DATA,
             MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.SIZE,
             MediaStore.Video.Media.BUCKET_DISPLAY_NAME
         )
 
@@ -30,23 +29,20 @@ class MediaStoreRepository(private val context: Context) {
         cursor?.use {
             val idColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
             val nameColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
-            val pathColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
             val durationColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-            val sizeColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
             val bucketColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
 
             while (it.moveToNext()) {
                 val id = it.getLong(idColumn)
                 val rawName = it.getString(nameColumn) ?: "Unknown Video"
                 val cleanName = if (rawName.contains(".")) rawName.substringBeforeLast(".") else rawName
+                val durationMs = it.getLong(durationColumn)
+                val formattedDuration = formatDuration(durationMs)
                 
-                val path = it.getString(pathColumn) ?: ""
-                val duration = it.getLong(durationColumn)
-                val size = it.getLong(sizeColumn)
                 val folderName = it.getString(bucketColumn) ?: "Internal Storage"
                 val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
 
-                val videoItem = VideoItem(id, cleanName, path, duration, size, contentUri.toString())
+                val videoItem = VideoItem(id, cleanName, formattedDuration, contentUri)
 
                 if (!folderMap.containsKey(folderName)) {
                     folderMap[folderName] = ArrayList()
@@ -60,5 +56,17 @@ class MediaStoreRepository(private val context: Context) {
             folderList.add(FolderItem(name, videos))
         }
         return folderList
+    }
+
+    private fun formatDuration(durationMs: Long): String {
+        val seconds = (durationMs / 1000) % 60
+        val minutes = (durationMs / (1000 * 60)) % 60
+        val hours = durationMs / (1000 * 60 * 60)
+
+        return if (hours > 0) {
+            String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+        }
     }
 }
