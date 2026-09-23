@@ -15,6 +15,11 @@ android {
         versionName = "1.0"
     }
 
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -43,4 +48,7 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")
     implementation("androidx.media3:media3-session:1.2.1")
+
+    // Image loading library (Glide)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
