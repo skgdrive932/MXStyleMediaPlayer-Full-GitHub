@@ -5,23 +5,12 @@
     android:layout_height="match_parent"
     android:background="#121212">
 
-    <!-- Categorization Tabs for Music/Video View -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#1E1E1E"
-        app:tabIndicatorColor="#FF4081"
-        app:tabSelectedTextColor="#FFFFFF"
-        app:tabTextColor="#B0B0B0" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewFolders"
+    <!-- Container for dynamic Fragment switching -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tabLayout"
-        android:layout_above="@id/bottomNavigation"
-        android:scrollbars="vertical" />
+        android:layout_above="@id/bottomNavigation" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
