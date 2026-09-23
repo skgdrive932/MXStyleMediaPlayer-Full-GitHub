@@ -13,12 +13,12 @@ import androidx.appcompat.app.AppCompatActivity
 class MusicPlayerActivity : AppCompatActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
-    private lateinit var tvTitle: TextView
-    private lateinit var tvArtist: TextView
-    private lateinit var btnPlayPause: ImageView
-    private lateinit var seekBar: SeekBar
-    private lateinit var tvCurrentTime: TextView
-    private lateinit var tvTotalTime: TextView
+    private var tvTitle: TextView? = null
+    private var tvArtist: TextView? = null
+    private var btnPlayPause: ImageView? = null
+    private var seekBar: SeekBar? = null
+    private var tvCurrentTime: TextView? = null
+    private var tvTotalTime: TextView? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private var isPlaying = false
@@ -27,29 +27,30 @@ class MusicPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
 
-        tvTitle = findViewById(R.id.tvSongTitle)
-        tvArtist = findViewById(R.id.tvArtistName)
+        // Null-safe ID mapping
+        tvTitle = findViewById(R.id.tvSongTitle) ?: findViewById(R.id.txtSongTitle)
+        tvArtist = findViewById(R.id.tvArtistName) ?: findViewById(R.id.txtArtistName)
         btnPlayPause = findViewById(R.id.btnPlayPause)
         seekBar = findViewById(R.id.seekBar)
-        tvCurrentTime = findViewById(R.id.tvCurrentTime)
-        tvTotalTime = findViewById(R.id.tvTotalTime)
+        tvCurrentTime = findViewById(R.id.tvCurrentTime) ?: findViewById(R.id.txtCurrentTime)
+        tvTotalTime = findViewById(R.id.tvTotalTime) ?: findViewById(R.id.txtTotalTime)
 
         val title = intent.getStringExtra("SONG_TITLE") ?: "Song Title"
         val artist = intent.getStringExtra("SONG_ARTIST") ?: "Artist Name"
         val songUriStr = intent.getStringExtra("SONG_URI")
 
-        tvTitle.text = title
-        tvArtist.text = artist
+        tvTitle?.text = title
+        tvArtist?.text = artist
 
         if (!songUriStr.isNullOrEmpty()) {
             initMediaPlayer(Uri.parse(songUriStr))
         }
 
-        btnPlayPause.setOnClickListener {
+        btnPlayPause?.setOnClickListener {
             if (isPlaying) pauseSong() else playSong()
         }
 
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) mediaPlayer?.seekTo(progress)
             }
@@ -66,9 +67,9 @@ class MusicPlayerActivity : AppCompatActivity() {
                 start()
             }
             isPlaying = true
-            btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
-            seekBar.max = mediaPlayer?.duration ?: 0
-            tvTotalTime.text = formatTime(mediaPlayer?.duration ?: 0)
+            btnPlayPause?.setImageResource(android.R.drawable.ic_media_pause)
+            seekBar?.max = mediaPlayer?.duration ?: 0
+            tvTotalTime?.text = formatTime(mediaPlayer?.duration ?: 0)
             updateSeekBar()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -78,13 +79,13 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun playSong() {
         mediaPlayer?.start()
         isPlaying = true
-        btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+        btnPlayPause?.setImageResource(android.R.drawable.ic_media_pause)
     }
 
     private fun pauseSong() {
         mediaPlayer?.pause()
         isPlaying = false
-        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+        btnPlayPause?.setImageResource(android.R.drawable.ic_media_play)
     }
 
     private fun updateSeekBar() {
@@ -92,8 +93,8 @@ class MusicPlayerActivity : AppCompatActivity() {
             override fun run() {
                 mediaPlayer?.let {
                     if (it.isPlaying) {
-                        seekBar.progress = it.currentPosition
-                        tvCurrentTime.text = formatTime(it.currentPosition)
+                        seekBar?.progress = it.currentPosition
+                        tvCurrentTime?.text = formatTime(it.currentPosition)
                     }
                 }
                 handler.postDelayed(this, 1000)
