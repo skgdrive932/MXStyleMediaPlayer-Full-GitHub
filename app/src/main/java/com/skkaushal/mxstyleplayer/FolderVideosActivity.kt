@@ -30,7 +30,7 @@ class FolderVideosActivity : AppCompatActivity() {
 
         val adapter = VideoAdapter(currentVideoList) { videoItem ->
             val index = currentVideoList.indexOf(videoItem)
-            PlayerActivity.videoList = currentVideoList
+            PlayerActivity.videoList = ArrayList(currentVideoList)
             PlayerActivity.currentPosition = if (index >= 0) index else 0
             startActivity(Intent(this, PlayerActivity::class.java))
         }
