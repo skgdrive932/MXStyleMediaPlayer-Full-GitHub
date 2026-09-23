@@ -13,12 +13,12 @@ import androidx.appcompat.app.AppCompatActivity
 class MusicPlayerActivity : AppCompatActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
-    private var tvTitle: TextView? = null
-    private var tvArtist: TextView? = null
+    private var txtTitle: TextView? = null
+    private var txtArtist: TextView? = null
     private var btnPlayPause: ImageView? = null
     private var seekBar: SeekBar? = null
-    private var tvCurrentTime: TextView? = null
-    private var tvTotalTime: TextView? = null
+    private var txtCurrentTime: TextView? = null
+    private var txtTotalTime: TextView? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private var isPlaying = false
@@ -27,20 +27,23 @@ class MusicPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
 
-        // Null-safe ID mapping
-        tvTitle = findViewById(R.id.tvSongTitle) ?: findViewById(R.id.txtSongTitle)
-        tvArtist = findViewById(R.id.tvArtistName) ?: findViewById(R.id.txtArtistName)
-        btnPlayPause = findViewById(R.id.btnPlayPause)
-        seekBar = findViewById(R.id.seekBar)
-        tvCurrentTime = findViewById(R.id.tvCurrentTime) ?: findViewById(R.id.txtCurrentTime)
-        tvTotalTime = findViewById(R.id.tvTotalTime) ?: findViewById(R.id.txtTotalTime)
+        txtTitle = findViewById(resources.getIdentifier("tvSongTitle", "id", packageName)) 
+            ?: findViewById(resources.getIdentifier("txtSongTitle", "id", packageName))
+        txtArtist = findViewById(resources.getIdentifier("tvArtistName", "id", packageName)) 
+            ?: findViewById(resources.getIdentifier("txtArtistName", "id", packageName))
+        btnPlayPause = findViewById(resources.getIdentifier("btnPlayPause", "id", packageName))
+        seekBar = findViewById(resources.getIdentifier("seekBar", "id", packageName))
+        txtCurrentTime = findViewById(resources.getIdentifier("tvCurrentTime", "id", packageName)) 
+            ?: findViewById(resources.getIdentifier("txtCurrentTime", "id", packageName))
+        txtTotalTime = findViewById(resources.getIdentifier("tvTotalTime", "id", packageName)) 
+            ?: findViewById(resources.getIdentifier("txtTotalTime", "id", packageName))
 
         val title = intent.getStringExtra("SONG_TITLE") ?: "Song Title"
         val artist = intent.getStringExtra("SONG_ARTIST") ?: "Artist Name"
         val songUriStr = intent.getStringExtra("SONG_URI")
 
-        tvTitle?.text = title
-        tvArtist?.text = artist
+        txtTitle?.text = title
+        txtArtist?.text = artist
 
         if (!songUriStr.isNullOrEmpty()) {
             initMediaPlayer(Uri.parse(songUriStr))
@@ -69,7 +72,7 @@ class MusicPlayerActivity : AppCompatActivity() {
             isPlaying = true
             btnPlayPause?.setImageResource(android.R.drawable.ic_media_pause)
             seekBar?.max = mediaPlayer?.duration ?: 0
-            tvTotalTime?.text = formatTime(mediaPlayer?.duration ?: 0)
+            txtTotalTime?.text = formatTime(mediaPlayer?.duration ?: 0)
             updateSeekBar()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -94,7 +97,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 mediaPlayer?.let {
                     if (it.isPlaying) {
                         seekBar?.progress = it.currentPosition
-                        tvCurrentTime?.text = formatTime(it.currentPosition)
+                        txtCurrentTime?.text = formatTime(it.currentPosition)
                     }
                 }
                 handler.postDelayed(this, 1000)
