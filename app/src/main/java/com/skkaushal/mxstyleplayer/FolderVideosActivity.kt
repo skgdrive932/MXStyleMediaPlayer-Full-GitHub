@@ -2,8 +2,8 @@ package com.skkaushal.mxstyleplayer
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.skkaushal.mxstyleplayer.model.VideoItem
@@ -19,10 +19,17 @@ class FolderVideosActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_folder_videos)
 
+        val toolbar = findViewById<Toolbar>(R.id.toolbarFolderVideos)
+        setSupportActionBar(toolbar)
+
         supportActionBar?.apply {
             title = folderName
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
+        }
+
+        toolbar.setNavigationOnClickListener {
+            finish()
         }
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewFolderVideos)
@@ -35,13 +42,5 @@ class FolderVideosActivity : AppCompatActivity() {
             startActivity(Intent(this, PlayerActivity::class.java))
         }
         recyclerView.adapter = adapter
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            finish()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 }
