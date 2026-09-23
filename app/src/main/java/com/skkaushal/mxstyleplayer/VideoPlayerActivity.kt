@@ -1,66 +1,97 @@
 package com.skkaushal.mxstyleplayer
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.WindowManager
+import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 
 class VideoPlayerActivity : AppCompatActivity() {
 
-    companion object {
-        var videoUri: Uri? = null
-        var videoTitle: String? = null
-    }
+    private lateinit var videoView: VideoView
+    private lateinit var gestureDetector: GestureDetector
+    private lateinit var audioManager: AudioManager
 
-    private var player: ExoPlayer? = null
-    private lateinit var playerView: PlayerView
+    private var screenWidth = 0
+    private var maxVolume = 0
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
 
-        playerView = findViewById(R.id.playerView)
+        videoView = findViewById(R.id.videoView)
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        screenWidth = resources.displayMetrics.widthPixels
 
-        val uriExtra = intent.getStringExtra("VIDEO_URI")
-        val uriToPlay = videoUri ?: if (!uriExtra.isNullOrEmpty()) Uri.parse(uriExtra) else null
-
-        if (uriToPlay == null) {
-            Toast.makeText(this, "Cannot play video: Invalid URI", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+        val videoUriStr = intent.getStringExtra("VIDEO_URI")
+        if (!videoUriStr.isNullOrEmpty()) {
+            videoView.setVideoURI(Uri.parse(videoUriStr))
+            videoView.start()
         }
 
-        initializePlayer(uriToPlay)
-    }
+        setupGestures()
 
-    private fun initializePlayer(uri: Uri) {
-        try {
-            player = ExoPlayer.Builder(this).build()
-            playerView.player = player
-
-            val mediaItem = MediaItem.fromUri(uri)
-            player?.setMediaItem(mediaItem)
-            player?.prepare()
-            player?.playWhenReady = true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Playback Error: ${e.message}", Toast.LENGTH_SHORT).show()
-            finish()
+        videoView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            true
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        player?.release()
-        player = null
+    private fun setupGestures() {
+        gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+
+            override fun onScroll(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                distanceX: Float,
+                distanceY: Float
+            ): Boolean {
+                if (e1 == null) return false
+
+                val deltaX = e2.x - e1.x
+                val deltaY = e1.y - e2.y
+
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // Horizontal Scroll: Seek Video (Forward / Rewind)
+                    if (Math.abs(deltaX) > 50) {
+                        val seekAmount = (deltaX / 10).toInt() * 1000
+                        val newPos = (videoView.currentPosition + seekAmount).coerceIn(0, videoView.duration)
+                        videoView.seekTo(newPos)
+                    }
+                } else {
+                    // Vertical Scroll: Left side Brightness, Right side Volume
+                    if (e1.x < screenWidth / 2) {
+                        adjustBrightness(deltaY)
+                    } else {
+                        adjustVolume(deltaY)
+                    }
+                }
+                return true
+            }
+        })
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        player?.release()
-        player = null
+    private fun adjustVolume(deltaY: Float) {
+        val currentVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        val change = if (deltaY > 0) 1 else -1
+        val newVol = (currentVol + change).coerceIn(0, maxVolume)
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, AudioManager.FLAG_SHOW_UI)
+    }
+
+    private fun adjustBrightness(deltaY: Float) {
+        val layoutParams = window.attributes
+        var currentBrightness = layoutParams.screenBrightness
+        if (currentBrightness < 0) currentBrightness = 0.5f
+
+        val change = if (deltaY > 0) 0.05f else -0.05f
+        layoutParams.screenBrightness = (currentBrightness + change).coerceIn(0.01f, 1.0f)
+        window.attributes = layoutParams
     }
 }
