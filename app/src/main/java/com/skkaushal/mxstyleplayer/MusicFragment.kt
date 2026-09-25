@@ -19,7 +19,7 @@ class MusicFragment : Fragment() {
     private lateinit var repository: MediaStoreRepository
     private lateinit var adapter: AudioAdapter
 
-    private var currentTabPosition = 0
+    private var currentList: List<AudioItem> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,15 +41,11 @@ class MusicFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        adapter = AudioAdapter(emptyList()) { item, _ ->
-            // Har Tab se song play karne ka intent
-            val intent = Intent(requireContext(), MusicPlayerActivity::class.java).apply {
-                putExtra("SONG_ID", item.id)
-                putExtra("SONG_PATH", item.dataPath)
-                putExtra("SONG_TITLE", item.title)
-                putExtra("SONG_ARTIST", item.artist)
-                putExtra("SONG_URI", item.uri.toString())
-            }
+        adapter = AudioAdapter(emptyList()) { item, position ->
+            MusicPlayerActivity.musicPlaylist = currentList
+            MusicPlayerActivity.currentSongIndex = position
+
+            val intent = Intent(requireContext(), MusicPlayerActivity::class.java)
             startActivity(intent)
         }
         recyclerView.adapter = adapter
@@ -67,7 +63,6 @@ class MusicFragment : Fragment() {
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 tab?.position?.let { position ->
-                    currentTabPosition = position
                     loadTabData(position)
                 }
             }
@@ -78,7 +73,7 @@ class MusicFragment : Fragment() {
     }
 
     private fun loadTabData(tabPosition: Int) {
-        val itemsList: List<AudioItem> = when (tabPosition) {
+        currentList = when (tabPosition) {
             0 -> repository.getAllAudioTracks()
             1 -> repository.getAlbums()
             2 -> repository.getArtists()
@@ -86,6 +81,6 @@ class MusicFragment : Fragment() {
             else -> repository.getAllAudioTracks()
         }
 
-        adapter.updateList(itemsList)
+        adapter.updateList(currentList)
     }
 }
