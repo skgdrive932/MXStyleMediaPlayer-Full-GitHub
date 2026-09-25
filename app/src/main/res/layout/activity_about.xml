@@ -7,11 +7,11 @@
     android:padding="24dp"
     android:background="#121212">
 
-    <!-- App Logo / Icon -->
+    <!-- App Logo -->
     <ImageView
         android:id="@+id/imgAppLogo"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:layout_marginTop="32dp"
         android:src="@mipmap/ic_launcher" />
 
@@ -52,32 +52,61 @@
 
     <!-- Developer Name -->
     <TextView
-        android:id="@+id/tvDevName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SK Kaushal"
+        android:text="Name: Sk Kaushal"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="16dp" />
 
-    <!-- Role / Description -->
+    <!-- Developer Email -->
     <TextView
+        android:id="@+id/tvEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Android App Developer & Designer"
-        android:textColor="#AAAAAA"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
+        android:text="Gmail: skgdrive932@gmail.com"
+        android:textColor="#2196F3"
+        android:textSize="15sp"
+        android:layout_marginTop="8dp" />
 
-    <!-- GitHub Link Button -->
-    <Button
-        android:id="@+id/btnGithub"
+    <!-- Developer Contact Number -->
+    <TextView
+        android:id="@+id/tvPhone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Visit GitHub Profile"
-        android:textAllCaps="false"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#2196F3"
-        android:textColor="#FFFFFF" />
+        android:text="Contact No: +919779371866"
+        android:textColor="#4CAF50"
+        android:textSize="15sp"
+        android:layout_marginTop="8dp" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="32dp">
+
+        <Button
+            android:id="@+id/btnEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send Email"
+            android:textAllCaps="false"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Call"
+            android:textAllCaps="false"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
 
 </LinearLayout>
