@@ -24,7 +24,15 @@ class VideoPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
 
-        playerView = findViewById(R.id.videoView)
+        // Dynamic ID lookup to avoid compile-time missing ID error
+        val idVideoView = resources.getIdentifier("videoView", "id", packageName)
+        val idPlayerView = resources.getIdentifier("playerView", "id", packageName)
+
+        playerView = when {
+            idVideoView != 0 -> findViewById(idVideoView)
+            idPlayerView != 0 -> findViewById(idPlayerView)
+            else -> null
+        }
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
