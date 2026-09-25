@@ -9,13 +9,21 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.skkaushal.mxstyleplayer.model.AudioItem
 
 class MusicPlayerActivity : AppCompatActivity() {
+
+    companion object {
+        var musicPlaylist: List<AudioItem> = emptyList()
+        var currentSongIndex: Int = 0
+    }
 
     private var mediaPlayer: MediaPlayer? = null
     private var txtTitle: TextView? = null
     private var txtArtist: TextView? = null
     private var btnPlayPause: ImageView? = null
+    private var btnNext: ImageView? = null
+    private var btnPrevious: ImageView? = null
     private var seekBar: SeekBar? = null
     private var txtCurrentTime: TextView? = null
     private var txtTotalTime: TextView? = null
@@ -27,30 +35,48 @@ class MusicPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
 
-        txtTitle = findViewById(resources.getIdentifier("tvSongTitle", "id", packageName)) 
+        txtTitle = findViewById(resources.getIdentifier("tvSongTitle", "id", packageName))
             ?: findViewById(resources.getIdentifier("txtSongTitle", "id", packageName))
-        txtArtist = findViewById(resources.getIdentifier("tvArtistName", "id", packageName)) 
+        txtArtist = findViewById(resources.getIdentifier("tvArtistName", "id", packageName))
             ?: findViewById(resources.getIdentifier("txtArtistName", "id", packageName))
         btnPlayPause = findViewById(resources.getIdentifier("btnPlayPause", "id", packageName))
+        btnNext = findViewById(resources.getIdentifier("btnNext", "id", packageName))
+        btnPrevious = findViewById(resources.getIdentifier("btnPrevious", "id", packageName))
         seekBar = findViewById(resources.getIdentifier("seekBar", "id", packageName))
-        txtCurrentTime = findViewById(resources.getIdentifier("tvCurrentTime", "id", packageName)) 
+        txtCurrentTime = findViewById(resources.getIdentifier("tvCurrentTime", "id", packageName))
             ?: findViewById(resources.getIdentifier("txtCurrentTime", "id", packageName))
-        txtTotalTime = findViewById(resources.getIdentifier("tvTotalTime", "id", packageName)) 
+        txtTotalTime = findViewById(resources.getIdentifier("tvTotalTime", "id", packageName))
             ?: findViewById(resources.getIdentifier("txtTotalTime", "id", packageName))
 
-        val title = intent.getStringExtra("SONG_TITLE") ?: "Song Title"
-        val artist = intent.getStringExtra("SONG_ARTIST") ?: "Artist Name"
-        val songUriStr = intent.getStringExtra("SONG_URI")
-
-        txtTitle?.text = title
-        txtArtist?.text = artist
-
-        if (!songUriStr.isNullOrEmpty()) {
-            initMediaPlayer(Uri.parse(songUriStr))
+        if (musicPlaylist.isNotEmpty() && currentSongIndex in musicPlaylist.indices) {
+            playSongAtIndex(currentSongIndex)
+        } else {
+            val title = intent.getStringExtra("SONG_TITLE") ?: "Song Title"
+            val artist = intent.getStringExtra("SONG_ARTIST") ?: "Artist Name"
+            val songUriStr = intent.getStringExtra("SONG_URI")
+            txtTitle?.text = title
+            txtArtist?.text = artist
+            if (!songUriStr.isNullOrEmpty()) {
+                initMediaPlayer(Uri.parse(songUriStr))
+            }
         }
 
         btnPlayPause?.setOnClickListener {
             if (isPlaying) pauseSong() else playSong()
+        }
+
+        btnNext?.setOnClickListener {
+            if (musicPlaylist.isNotEmpty()) {
+                currentSongIndex = (currentSongIndex + 1) % musicPlaylist.size
+                playSongAtIndex(currentSongIndex)
+            }
+        }
+
+        btnPrevious?.setOnClickListener {
+            if (musicPlaylist.isNotEmpty()) {
+                currentSongIndex = if (currentSongIndex - 1 < 0) musicPlaylist.size - 1 else currentSongIndex - 1
+                playSongAtIndex(currentSongIndex)
+            }
         }
 
         seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -62,8 +88,16 @@ class MusicPlayerActivity : AppCompatActivity() {
         })
     }
 
+    private fun playSongAtIndex(index: Int) {
+        val item = musicPlaylist[index]
+        txtTitle?.text = item.title
+        txtArtist?.text = item.artist
+        initMediaPlayer(item.uri)
+    }
+
     private fun initMediaPlayer(uri: Uri) {
         try {
+            mediaPlayer?.release()
             mediaPlayer = MediaPlayer().apply {
                 setDataSource(applicationContext, uri)
                 prepare()
