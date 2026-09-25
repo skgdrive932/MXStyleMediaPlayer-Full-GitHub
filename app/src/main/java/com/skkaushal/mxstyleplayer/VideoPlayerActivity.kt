@@ -24,11 +24,8 @@ class VideoPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
 
-        val idVideoView = resources.getIdentifier("videoView", "id", packageName)
-        val idPlayerView = resources.getIdentifier("playerView", "id", packageName)
+        playerView = findViewById(R.id.videoView)
 
-        playerView = if (idVideoView != 0) findViewById(idVideoView) else findViewById(idPlayerView)
-        
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         screenWidth = resources.displayMetrics.widthPixels
@@ -36,13 +33,17 @@ class VideoPlayerActivity : AppCompatActivity() {
         val videoUriStr = intent.getStringExtra("VIDEO_URI")
         if (!videoUriStr.isNullOrEmpty()) {
             playerView?.setVideoURI(Uri.parse(videoUriStr))
-            playerView?.start()
+            playerView?.setOnPreparedListener {
+                it.start()
+            }
         }
 
         setupGestures()
 
         playerView?.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
+            if (::gestureDetector.isInitialized) {
+                gestureDetector.onTouchEvent(event)
+            }
             true
         }
     }
