@@ -8,14 +8,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.skkaushal.mxstyleplayer.model.VideoItem
+import com.skkaushal.mxstyleplayer.model.FolderItem
 import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
 
 class VideoFoldersFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var repository: MediaStoreRepository
-    private lateinit var adapter: VideoAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,19 +29,15 @@ class VideoFoldersFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         repository = MediaStoreRepository(requireContext())
 
-        // Collect videos using 'videoList' property
-        val allFolders = repository.getAllFolders()
-        val allVideos: List<VideoItem> = allFolders.flatMap { it.videoList }
+        val folderList: List<FolderItem> = repository.getAllFolders()
 
-        adapter = VideoAdapter(allVideos) { videoItem, _ ->
-            val intent = Intent(requireContext(), VideoPlayerActivity::class.java).apply {
-                putExtra("VIDEO_URI", videoItem.uri.toString())
-                putExtra("VIDEO_TITLE", videoItem.title)
+        recyclerView.adapter = VideoFolderAdapter(folderList) { selectedFolder ->
+            val intent = Intent(requireContext(), FolderVideosActivity::class.java).apply {
+                putExtra("FOLDER_NAME", selectedFolder.folderName)
             }
             startActivity(intent)
         }
 
-        recyclerView.adapter = adapter
         return view
     }
 }
