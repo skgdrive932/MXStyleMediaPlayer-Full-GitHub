@@ -30,14 +30,14 @@ class VideoFoldersFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         repository = MediaStoreRepository(requireContext())
 
-        // Collect all videos from all folders
+        // Collect videos using 'videoList' property
         val allFolders = repository.getAllFolders()
-        val allVideos: List<VideoItem> = allFolders.flatMap { it.videos }
+        val allVideos: List<VideoItem> = allFolders.flatMap { it.videoList }
 
         adapter = VideoAdapter(allVideos) { videoItem, _ ->
             val intent = Intent(requireContext(), VideoPlayerActivity::class.java).apply {
                 putExtra("VIDEO_URI", videoItem.uri.toString())
-                putExtra("VIDEO_TITLE", videoItem.name)
+                putExtra("VIDEO_TITLE", videoItem.title)
             }
             startActivity(intent)
         }
