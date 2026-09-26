@@ -35,16 +35,16 @@ class FolderVideosActivity : AppCompatActivity() {
         val repository = MediaStoreRepository(this)
         val allFolders = repository.getAllFolders()
 
-        // Match the target folder name from repository
-        val matchedFolder = allFolders.find { it.name.equals(targetFolder, ignoreCase = true) }
+        // Match folder using 'folderName' and access 'videoList'
+        val matchedFolder = allFolders.find { it.folderName.equals(targetFolder, ignoreCase = true) }
         
-        videoList = matchedFolder?.videos ?: allFolders.flatMap { it.videos }
+        videoList = matchedFolder?.videoList ?: allFolders.flatMap { it.videoList }
 
         adapter = VideoAdapter(videoList) { videoItem, _ ->
             try {
                 val intent = Intent(this, VideoPlayerActivity::class.java).apply {
                     putExtra("VIDEO_URI", videoItem.uri.toString())
-                    putExtra("VIDEO_TITLE", videoItem.name)
+                    putExtra("VIDEO_TITLE", videoItem.title)
                 }
                 startActivity(intent)
             } catch (e: Exception) {
