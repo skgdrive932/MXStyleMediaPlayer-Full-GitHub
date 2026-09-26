@@ -20,27 +20,32 @@ class FolderSongsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_folder_songs)
 
-        tvFolderName = findViewById(resources.getIdentifier("tvFolderName", "id", packageName))
-            ?: findViewById(android.R.id.text1)
-        recyclerView = findViewById(resources.getIdentifier("rvFolderSongs", "id", packageName))
-            ?: findViewById(resources.getIdentifier("recyclerViewMusic", "id", packageName))
+        val idFolderName = resources.getIdentifier("tvFolderName", "id", packageName)
+        val idRvFolderSongs = resources.getIdentifier("rvFolderSongs", "id", packageName)
 
-        val folderName = intent.getStringExtra("FOLDER_NAME") ?: "Folder Songs"
-        tvFolderName.text = folderName
+        tvFolderName = if (idFolderName != 0) findViewById(idFolderName) else findViewById(android.R.id.text1)
+        recyclerView = if (idRvFolderSongs != 0) findViewById(idRvFolderSongs) else findViewById(resources.getIdentifier("recyclerViewMusic", "id", packageName))
+
+        val targetFolder = intent.getStringExtra("FOLDER_NAME") ?: "Folder Songs"
+        tvFolderName.text = targetFolder
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Storage se is particular folder ke songs fetch karna
         val repository = MediaStoreRepository(this)
         val allSongs = repository.getAllAudioTracks()
-        folderSongsList = allSongs.filter { it.folderName == folderName || it.album == folderName || it.artist == folderName }
 
-        // Agar filter se khali mile toh fallback saare songs
+        // Filter based on album, artist, or song path matching folder name
+        folderSongsList = allSongs.filter { song ->
+            song.album.equals(targetFolder, ignoreCase = true) ||
+            song.artist.equals(targetFolder, ignoreCase = true) ||
+            song.uri.path?.contains(targetFolder, ignoreCase = true) == true
+        }
+
         if (folderSongsList.isEmpty()) {
             folderSongsList = allSongs
         }
 
-        adapter = AudioAdapter(folderSongsList) { item, position ->
+        adapter = AudioAdapter(folderSongsList) { _, position ->
             MusicPlayerActivity.musicPlaylist = folderSongsList
             MusicPlayerActivity.currentSongIndex = position
 
