@@ -5,15 +5,17 @@ import android.content.Context
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 
 class VideoPlayerActivity : AppCompatActivity() {
 
     private var playerView: VideoView? = null
-    private lateinit var gestureDetector: GestureDetector
+    private var gestureDetector: GestureDetector? = null
     private lateinit var audioManager: AudioManager
 
     private var screenWidth = 0
@@ -24,35 +26,50 @@ class VideoPlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
 
-        // Dynamic ID lookup to avoid compile-time missing ID error
-        val idVideoView = resources.getIdentifier("videoView", "id", packageName)
-        val idPlayerView = resources.getIdentifier("playerView", "id", packageName)
+        try {
+            // Find VideoView safely
+            val idVideoView = resources.getIdentifier("videoView", "id", packageName)
+            val idPlayerView = resources.getIdentifier("playerView", "id", packageName)
 
-        playerView = when {
-            idVideoView != 0 -> findViewById(idVideoView)
-            idPlayerView != 0 -> findViewById(idPlayerView)
-            else -> null
-        }
-
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-        screenWidth = resources.displayMetrics.widthPixels
-
-        val videoUriStr = intent.getStringExtra("VIDEO_URI")
-        if (!videoUriStr.isNullOrEmpty()) {
-            playerView?.setVideoURI(Uri.parse(videoUriStr))
-            playerView?.setOnPreparedListener {
-                it.start()
+            playerView = when {
+                idVideoView != 0 -> findViewById(idVideoView)
+                idPlayerView != 0 -> findViewById(idPlayerView)
+                else -> null
             }
-        }
 
-        setupGestures()
+            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            screenWidth = resources.displayMetrics.widthPixels
 
-        playerView?.setOnTouchListener { _, event ->
-            if (::gestureDetector.isInitialized) {
-                gestureDetector.onTouchEvent(event)
+            val videoUriStr = intent.getStringExtra("VIDEO_URI")
+            
+            if (!videoUriStr.isNullOrEmpty()) {
+                val videoUri = Uri.parse(videoUriStr)
+                playerView?.setVideoURI(videoUri)
+                
+                playerView?.setOnPreparedListener { mp ->
+                    mp.start()
+                }
+
+                playerView?.setOnErrorListener { _, _, _ ->
+                    Toast.makeText(this, "Video play nahi ho pa rahi hai", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            } else {
+                Toast.makeText(this, "Invalid Video File", Toast.LENGTH_SHORT).show()
             }
-            true
+
+            setupGestures()
+
+            playerView?.setOnTouchListener { _, event ->
+                gestureDetector?.onTouchEvent(event) ?: false
+                true
+            }
+
+        } catch (e: Exception) {
+            Log.e("VideoPlayerActivity", "Error loading video: ${e.message}")
+            Toast.makeText(this, "Error playing video", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 
