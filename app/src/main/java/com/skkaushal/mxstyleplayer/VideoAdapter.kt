@@ -8,13 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.skkaushal.mxstyleplayer.model.VideoItem
 
 class VideoAdapter(
-    private var videoList: List<VideoItem>,
+    private val videoList: List<VideoItem>,
     private val onItemClick: (VideoItem, Int) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(android.R.id.text1)
-        val tvSubTitle: TextView? = itemView.findViewById(android.R.id.text2)
+        val tvSubtitle: TextView = itemView.findViewById(android.R.id.text2)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
@@ -24,19 +24,13 @@ class VideoAdapter(
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
-        val item = videoList[position]
-        holder.tvTitle.text = item.title
-        holder.tvSubTitle?.text = item.duration ?: ""
-
+        val video = videoList[position]
+        holder.tvTitle.text = video.title
+        holder.tvSubtitle.text = video.duration
         holder.itemView.setOnClickListener {
-            onItemClick(item, position)
+            onItemClick(video, position)
         }
     }
 
     override fun getItemCount(): Int = videoList.size
-
-    fun updateList(newList: List<VideoItem>) {
-        videoList = newList
-        notifyDataSetChanged()
-    }
 }
