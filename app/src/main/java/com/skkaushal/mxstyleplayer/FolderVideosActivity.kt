@@ -33,11 +33,16 @@ class FolderVideosActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val repository = MediaStoreRepository(this)
-        val allVideos = repository.getAllVideos()
+
+        val allVideos = try {
+            repository.getVideos()
+        } catch (e: Exception) {
+            emptyList()
+        }
 
         videoList = allVideos.filter { video ->
-            video.folderName.equals(targetFolder, ignoreCase = true) ||
-            video.uri.path?.contains(targetFolder, ignoreCase = true) == true
+            video.title.contains(targetFolder, ignoreCase = true) ||
+            video.path.contains(targetFolder, ignoreCase = true)
         }
 
         if (videoList.isEmpty()) {
@@ -47,12 +52,12 @@ class FolderVideosActivity : AppCompatActivity() {
         adapter = VideoAdapter(videoList) { videoItem, _ ->
             try {
                 val intent = Intent(this, VideoPlayerActivity::class.java).apply {
-                    putExtra("VIDEO_URI", videoItem.uri.toString())
+                    putExtra("VIDEO_URI", videoItem.path)
                     putExtra("VIDEO_TITLE", videoItem.title)
                 }
                 startActivity(intent)
             } catch (e: Exception) {
-                Toast.makeText(this, "Video open karne me dikkat aai", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Video play nahi ho pa rahi hai", Toast.LENGTH_SHORT).show()
             }
         }
 
