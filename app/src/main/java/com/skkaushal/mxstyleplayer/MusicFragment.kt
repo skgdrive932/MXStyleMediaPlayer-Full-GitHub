@@ -9,18 +9,14 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
-import com.skkaushal.mxstyleplayer.model.AudioItem
-import com.skkaushal.mxstyleplayer.util.MediaStoreRepository
+import com.skkaushal.mxstyleplayer.util.AudioRepository
 
 class MusicFragment : Fragment() {
 
-    private lateinit var tabLayout: TabLayout
     private lateinit var recyclerView: RecyclerView
-    private lateinit var repository: MediaStoreRepository
+    private lateinit var tabLayout: TabLayout
+    private lateinit var repository: AudioRepository
     private lateinit var adapter: AudioAdapter
-
-    private var currentList: List<AudioItem> = emptyList()
-    private var currentTabPosition: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,69 +25,49 @@ class MusicFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_music, container, false)
 
-        tabLayout = view.findViewById(R.id.musicTabLayout)
-        recyclerView = view.findViewById(R.id.recyclerViewMusic)
+        val rvId = resources.getIdentifier("recyclerViewMusic", "id", requireContext().packageName)
+        val fallbackRvId = resources.getIdentifier("recyclerView", "id", requireContext().packageName)
+        
+        recyclerView = when {
+            rvId != 0 -> view.findViewById(rvId)
+            fallbackRvId != 0 -> view.findViewById(fallbackRvId)
+            else -> view.findViewById(android.R.id.list)
+        }
+
+        val tabId = resources.getIdentifier("tabLayout", "id", requireContext().packageName)
+        if (tabId != 0) {
+            tabLayout = view.findViewById(tabId)
+        }
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        repository = MediaStoreRepository(requireContext())
+        repository = AudioRepository(requireContext())
 
-        setupAdapter()
-        setupTabs()
-
-        return view
-    }
-
-    private fun setupAdapter() {
-        adapter = AudioAdapter(emptyList()) { item, position ->
-            if (currentTabPosition == 0) {
-                // Tracks Tab: Seedha Song Play Karega
-                MusicPlayerActivity.musicPlaylist = currentList
-                MusicPlayerActivity.currentSongIndex = position
-
-                val intent = Intent(requireContext(), MusicPlayerActivity::class.java)
-                startActivity(intent)
-            } else {
-                // Albums / Artists / Folders Tab: Pehle Folder Ke Songs Ki List Kholega
-                val intent = Intent(requireContext(), FolderSongsActivity::class.java).apply {
-                    putExtra("FOLDER_NAME", item.title)
-                }
-                startActivity(intent)
+        val initialList = repository.getAllAudioTracks()
+        adapter = AudioAdapter(initialList) { selectedItem, _ ->
+            val intent = Intent(requireContext(), MusicPlayerActivity::class.java).apply {
+                putExtra("SONG_PATH", selectedItem.path)
+                putExtra("SONG_TITLE", selectedItem.title)
+                putExtra("SONG_ARTIST", selectedItem.artist)
             }
+            startActivity(intent)
         }
         recyclerView.adapter = adapter
-    }
-
-    private fun setupTabs() {
-        tabLayout.removeAllTabs()
-        tabLayout.addTab(tabLayout.newTab().setText("Tracks"))
-        tabLayout.addTab(tabLayout.newTab().setText("Albums"))
-        tabLayout.addTab(tabLayout.newTab().setText("Artists"))
-        tabLayout.addTab(tabLayout.newTab().setText("Folders"))
-
-        loadTabData(0)
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                tab?.position?.let { position ->
-                    currentTabPosition = position
-                    loadTabData(position)
+                when (tab?.position) {
+                    0 -> adapter.updateList(repository.getAllAudioTracks())
+                    1 -> adapter.updateList(repository.getAlbums())
+                    2 -> adapter.updateList(repository.getArtists())
+                    3 -> adapter.updateList(repository.getFolders())
+                    else -> adapter.updateList(repository.getAllAudioTracks())
                 }
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
-    }
 
-    private fun loadTabData(tabPosition: Int) {
-        currentList = when (tabPosition) {
-            0 -> repository.getAllAudioTracks()
-            1 -> repository.getAlbums()
-            2 -> repository.getArtists()
-            3 -> repository.getFolders()
-            else -> repository.getAllAudioTracks()
-        }
-
-        adapter.updateList(currentList)
+        return view
     }
 }
