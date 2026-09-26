@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.skkaushal.mxstyleplayer.model.AudioItem
 
 class AudioAdapter(
-    private val audioList: List<AudioItem>,
+    private var audioList: List<AudioItem>,
     private val onItemClick: (AudioItem, Int) -> Unit
 ) : RecyclerView.Adapter<AudioAdapter.AudioViewHolder>() {
 
@@ -28,6 +28,11 @@ class AudioAdapter(
                 onItemClick(item, position)
             }
         }
+    }
+
+    fun updateList(newList: List<AudioItem>) {
+        this.audioList = newList
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AudioViewHolder {
