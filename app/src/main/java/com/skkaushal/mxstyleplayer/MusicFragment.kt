@@ -20,6 +20,7 @@ class MusicFragment : Fragment() {
     private lateinit var adapter: AudioAdapter
 
     private var currentList: List<AudioItem> = emptyList()
+    private var currentTabPosition: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,11 +43,20 @@ class MusicFragment : Fragment() {
 
     private fun setupAdapter() {
         adapter = AudioAdapter(emptyList()) { item, position ->
-            MusicPlayerActivity.musicPlaylist = currentList
-            MusicPlayerActivity.currentSongIndex = position
+            if (currentTabPosition == 0) {
+                // Tracks Tab: Seedha Song Play Karega
+                MusicPlayerActivity.musicPlaylist = currentList
+                MusicPlayerActivity.currentSongIndex = position
 
-            val intent = Intent(requireContext(), MusicPlayerActivity::class.java)
-            startActivity(intent)
+                val intent = Intent(requireContext(), MusicPlayerActivity::class.java)
+                startActivity(intent)
+            } else {
+                // Albums / Artists / Folders Tab: Pehle Folder Ke Songs Ki List Kholega
+                val intent = Intent(requireContext(), FolderSongsActivity::class.java).apply {
+                    putExtra("FOLDER_NAME", item.title)
+                }
+                startActivity(intent)
+            }
         }
         recyclerView.adapter = adapter
     }
@@ -63,6 +73,7 @@ class MusicFragment : Fragment() {
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 tab?.position?.let { position ->
+                    currentTabPosition = position
                     loadTabData(position)
                 }
             }
