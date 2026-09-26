@@ -2,6 +2,7 @@ package com.skkaushal.mxstyleplayer.util
 
 import android.content.ContentUris
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore
 import com.skkaushal.mxstyleplayer.model.AudioItem
 
@@ -38,7 +39,7 @@ class AudioRepository(private val context: Context) {
                 while (it.moveToNext()) {
                     val id = if (idCol != -1) it.getLong(idCol) else 0L
                     val title = if (titleCol != -1) it.getString(titleCol) ?: "Unknown Song" else "Unknown Song"
-                    val artist = if (artistCol != -1) it.getString(artistCol) ?: "<unknown>" else "<unknown>"
+                    val artist = if (artistCol != -1) it.getString(artistCol) ?: "Unknown Artist" else "Unknown Artist"
                     val album = if (albumCol != -1) it.getString(albumCol) ?: "Unknown Album" else "Unknown Album"
                     val path = if (pathCol != -1) it.getString(pathCol) ?: "" else ""
                     val durationMs = if (durationCol != -1) it.getLong(durationCol) else 0L
@@ -47,12 +48,23 @@ class AudioRepository(private val context: Context) {
                     val minutes = (durationMs / (1000 * 60)) % 60
                     val durationStr = String.format("%02d:%02d", minutes, seconds)
 
-                    val contentUri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        id
-                    )
+                    val contentUri: Uri = if (id != 0L) {
+                        ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
+                    } else {
+                        Uri.EMPTY
+                    }
 
-                    audioList.add(AudioItem(id, title, artist, album, path, contentUri, durationStr))
+                    audioList.add(
+                        AudioItem(
+                            id = id,
+                            title = title,
+                            artist = artist,
+                            album = album,
+                            path = path,
+                            uri = contentUri,
+                            duration = durationStr
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
@@ -62,11 +74,38 @@ class AudioRepository(private val context: Context) {
         return audioList
     }
 
-    fun getAlbums(): List<AudioItem> = getAllAudioTracks().distinctBy { it.album }
+    fun getAlbums(): List<AudioItem> {
+        val tracks = getAllAudioTracks()
+        return tracks.groupBy { it.album }.map { (albumName, list) ->
+            val first = list.first()
+            first.copy(
+                title = albumName,
+                songCount = list.size
+            )
+        }
+    }
 
-    fun getArtists(): List<AudioItem> = getAllAudioTracks().distinctBy { it.artist }
+    fun getArtists(): List<AudioItem> {
+        val tracks = getAllAudioTracks()
+        return tracks.groupBy { it.artist }.map { (artistName, list) ->
+            val first = list.first()
+            first.copy(
+                title = artistName,
+                songCount = list.size
+            )
+        }
+    }
 
-    fun getFolders(): List<AudioItem> = getAllAudioTracks().distinctBy { 
-        it.path.substringBeforeLast('/') 
+    fun getFolders(): List<AudioItem> {
+        val tracks = getAllAudioTracks()
+        return tracks.groupBy { it.path.substringBeforeLast('/', "Internal") }.map { (folderPath, list) ->
+            val folderName = folderPath.substringAfterLast('/')
+            val first = list.first()
+            first.copy(
+                title = folderName,
+                path = folderPath,
+                songCount = list.size
+            )
+        }
     }
 }
