@@ -8,40 +8,37 @@ import androidx.recyclerview.widget.RecyclerView
 import com.skkaushal.mxstyleplayer.model.AudioItem
 
 class AudioAdapter(
-    private var items: List<AudioItem>,
+    private val audioList: List<AudioItem>,
     private val onItemClick: (AudioItem, Int) -> Unit
 ) : RecyclerView.Adapter<AudioAdapter.AudioViewHolder>() {
 
-    class AudioViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
-        val tvSubtitle: TextView = itemView.findViewById(R.id.tvSubtitle)
+    inner class AudioViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val titleTextView: TextView = itemView.findViewById(android.R.id.text1)
+        val subtitleTextView: TextView = itemView.findViewById(android.R.id.text2)
+
+        fun bind(item: AudioItem, position: Int) {
+            titleTextView.text = item.title
+            subtitleTextView.text = if (item.songCount > 0) {
+                "${item.artist} • ${item.songCount} Songs"
+            } else {
+                "${item.artist} • ${item.duration}"
+            }
+
+            itemView.setOnClickListener {
+                onItemClick(item, position)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AudioViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_audio_track, parent, false)
+            .inflate(android.R.layout.simple_list_item_2, parent, false)
         return AudioViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: AudioViewHolder, position: Int) {
-        val item = items[position]
-        holder.tvTitle.text = item.title
-        
-        if (item.songCount > 0) {
-            holder.tvSubtitle.text = item.artist
-        } else {
-            holder.tvSubtitle.text = "${item.artist} • ${item.album}"
-        }
-
-        holder.itemView.setOnClickListener {
-            onItemClick(item, position)
-        }
+        holder.bind(audioList[position], position)
     }
 
-    override fun getItemCount(): Int = items.size
-
-    fun updateList(newList: List<AudioItem>) {
-        items = newList
-        notifyDataSetChanged()
-    }
+    override fun getItemCount(): Int = audioList.size
 }
