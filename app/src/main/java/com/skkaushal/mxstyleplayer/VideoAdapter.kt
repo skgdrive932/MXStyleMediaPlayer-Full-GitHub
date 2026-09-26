@@ -1,43 +1,42 @@
 package com.skkaushal.mxstyleplayer
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.skkaushal.mxstyleplayer.databinding.ItemVideoBinding
 import com.skkaushal.mxstyleplayer.model.VideoItem
 
 class VideoAdapter(
-    private val videoList: List<VideoItem>,
-    private val onVideoClick: (VideoItem) -> Unit
+    private var videoList: List<VideoItem>,
+    private val onItemClick: (VideoItem, Int) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
-    inner class VideoViewHolder(val binding: ItemVideoBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvTitle: TextView = itemView.findViewById(android.R.id.text1)
+        val tvSubTitle: TextView? = itemView.findViewById(android.R.id.text2)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
-        val binding = ItemVideoBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
-        )
-        return VideoViewHolder(binding)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(android.R.layout.simple_list_item_2, parent, false)
+        return VideoViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
-        val video = videoList[position]
-
-        holder.binding.txtTitle.text = video.title
-        holder.binding.txtDurationBadge.text = video.duration
-
-        Glide.with(holder.itemView.context)
-            .load(video.uri)
-            .centerCrop()
-            .placeholder(android.R.color.darker_gray)
-            .into(holder.binding.imgThumbnail)
+        val item = videoList[position]
+        holder.tvTitle.text = item.title
+        holder.tvSubTitle?.text = item.duration ?: ""
 
         holder.itemView.setOnClickListener {
-            onVideoClick(video)
+            onItemClick(item, position)
         }
     }
 
     override fun getItemCount(): Int = videoList.size
+
+    fun updateList(newList: List<VideoItem>) {
+        videoList = newList
+        notifyDataSetChanged()
+    }
 }
