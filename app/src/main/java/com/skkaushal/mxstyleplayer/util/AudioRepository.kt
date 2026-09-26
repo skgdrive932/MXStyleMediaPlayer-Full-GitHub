@@ -8,54 +8,65 @@ import com.skkaushal.mxstyleplayer.model.AudioItem
 class AudioRepository(private val context: Context) {
 
     fun getAllAudioTracks(): List<AudioItem> {
-        val audioList = ArrayList<AudioItem>()
+        val audioList = mutableListOf<AudioItem>()
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.DATA
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.DURATION
         )
 
-        val cursor = context.contentResolver.query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            MediaStore.Audio.Media.IS_MUSIC + "!= 0",
-            null,
-            "${MediaStore.Audio.Media.TITLE} ASC"
-        )
+        try {
+            val cursor = context.contentResolver.query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                null
+            )
 
-        cursor?.use {
-            val idCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-            val titleCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
-            val artistCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-            val albumCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-            val durationCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
-            val dataCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+            cursor?.use {
+                val idCol = it.getColumnIndex(MediaStore.Audio.Media._ID)
+                val titleCol = it.getColumnIndex(MediaStore.Audio.Media.TITLE)
+                val artistCol = it.getColumnIndex(MediaStore.Audio.Media.ARTIST)
+                val albumCol = it.getColumnIndex(MediaStore.Audio.Media.ALBUM)
+                val pathCol = it.getColumnIndex(MediaStore.Audio.Media.DATA)
+                val durationCol = it.getColumnIndex(MediaStore.Audio.Media.DURATION)
 
-            while (it.moveToNext()) {
-                val id = it.getLong(idCol)
-                val title = it.getString(titleCol) ?: "Unknown Song"
-                val artist = it.getString(artistCol) ?: "<Unknown Artist>"
-                val album = it.getString(albumCol) ?: "Unknown Album"
-                val duration = it.getLong(durationCol)
-                val path = it.getString(dataCol) ?: ""
-                val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
+                while (it.moveToNext()) {
+                    val id = if (idCol != -1) it.getLong(idCol) else 0L
+                    val title = if (titleCol != -1) it.getString(titleCol) ?: "Unknown Song" else "Unknown Song"
+                    val artist = if (artistCol != -1) it.getString(artistCol) ?: "<unknown>" else "<unknown>"
+                    val album = if (albumCol != -1) it.getString(albumCol) ?: "Unknown Album" else "Unknown Album"
+                    val path = if (pathCol != -1) it.getString(pathCol) ?: "" else ""
+                    val durationMs = if (durationCol != -1) it.getLong(durationCol) else 0L
 
-                audioList.add(
-                    AudioItem(
-                        id = id,
-                        title = title,
-                        artist = artist,
-                        album = album,
-                        duration = duration,
-                        uri = uri,
-                        dataPath = path
+                    val seconds = (durationMs / 1000) % 60
+                    val minutes = (durationMs / (1000 * 60)) % 60
+                    val durationStr = String.format("%02d:%02d", minutes, seconds)
+
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        id
                     )
-                )
+
+                    audioList.add(AudioItem(id, title, artist, album, path, contentUri, durationStr))
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+
         return audioList
+    }
+
+    fun getAlbums(): List<AudioItem> = getAllAudioTracks().distinctBy { it.album }
+
+    fun getArtists(): List<AudioItem> = getAllAudioTracks().distinctBy { it.artist }
+
+    fun getFolders(): List<AudioItem> = getAllAudioTracks().distinctBy { 
+        it.path.substringBeforeLast('/') 
     }
 }
