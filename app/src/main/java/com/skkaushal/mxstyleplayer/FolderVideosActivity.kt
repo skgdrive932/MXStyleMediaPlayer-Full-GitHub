@@ -33,24 +33,18 @@ class FolderVideosActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val repository = MediaStoreRepository(this)
+        val allFolders = repository.getAllFolders()
+
+        // Match the target folder name from repository
+        val matchedFolder = allFolders.find { it.name.equals(targetFolder, ignoreCase = true) }
         
-        // Correct repository method call for video list
-        val allVideos: List<VideoItem> = repository.getAllVideoTracks()
-
-        videoList = allVideos.filter { video ->
-            video.title.contains(targetFolder, ignoreCase = true) ||
-            video.uri.path?.contains(targetFolder, ignoreCase = true) == true
-        }
-
-        if (videoList.isEmpty()) {
-            videoList = allVideos
-        }
+        videoList = matchedFolder?.videos ?: allFolders.flatMap { it.videos }
 
         adapter = VideoAdapter(videoList) { videoItem, _ ->
             try {
                 val intent = Intent(this, VideoPlayerActivity::class.java).apply {
                     putExtra("VIDEO_URI", videoItem.uri.toString())
-                    putExtra("VIDEO_TITLE", videoItem.title)
+                    putExtra("VIDEO_TITLE", videoItem.name)
                 }
                 startActivity(intent)
             } catch (e: Exception) {
